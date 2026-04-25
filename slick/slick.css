@@ -7,8 +7,7 @@
     -webkit-user-select: none;
     user-select: text;
     -webkit-touch-callout: none;
-    -ms-touch-action: pan-y;
-        touch-action: pan-y;
+    touch-action: pan-y;
     -webkit-tap-highlight-color: transparent;
 }
 
