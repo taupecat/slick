@@ -98,22 +98,22 @@
 				currentLeft      : null,
 				currentSlide     : 0,
 				direction        : 1,
-				$dots            : null,
+				dots             : null,
 				listWidth        : null,
 				listHeight       : null,
 				loadIndex        : 0,
-				$nextArrow       : null,
-				$prevArrow       : null,
+				nextArrow        : null,
+				prevArrow        : null,
 				scrolling        : false,
 				slideCount       : null,
 				slideWidth       : null,
-				$slideTrack      : null,
-				$slides          : null,
+				slideTrack       : null,
+				slides           : null,
 				sliding          : false,
 				slideOffset      : 0,
 				swipeLeft        : null,
 				swiping          : false,
-				$list            : null,
+				list             : null,
 				touchObject      : {},
 				transformsEnabled: false,
 				unslicked        : false
@@ -135,8 +135,8 @@
 			_.respondTo          = null;
 			_.rowCount           = 1;
 			_.shouldClick        = true;
-			_.slider            = $( element );
-			_.slidesCache       = null;
+			_.slider             = element;
+			_.slidesCache        = null;
 			_.transformType      = null;
 			_.transitionType     = null;
 			_.visibilityChange   = 'visibilitychange';
@@ -462,7 +462,7 @@
 
         if (_.options.dots === true && _.slideCount > _.options.slidesToShow) {
 
-            _.slider.addClass('slick-dotted');
+            _.slider.classList.add( 'slick-dotted' );
 
             dot = $('<ul></ul>').addClass(_.options.dotsClass);
 
@@ -495,11 +495,11 @@
                 .data('originalStyling', $(element).attr('style') || '');
         });
 
-        _.slider.addClass('slick-slider');
+        _.slider.classList.add( 'slick-slider' );
 
-        _.slideTrack = (_.slideCount === 0) ?
-            $('<div class="slick-track"></div>').appendTo(_.slider) :
-            _.slides.wrapAll('<div class="slick-track"></div>').parent();
+        _.slideTrack = ( 0 === _.slideCount ) ?
+            $( '<div class="slick-track"></div>' ).appendTo( _.slider ) :
+            _.slides.wrapAll( '<div class="slick-track"></div>' ).parent();
 
         _.list = _.slideTrack.wrap(
             '<div class="slick-list"></div>').parent();
@@ -572,7 +572,7 @@
 
         var _ = this,
             breakpoint, targetBreakpoint, respondToWidth, triggerBreakpoint = false;
-        var sliderWidth = _.slider.width();
+        var sliderWidth = _.slider.offsetWidth;
         var windowWidth = window.innerWidth;
 
         if (_.respondTo === 'window') {
@@ -879,9 +879,9 @@
 
         _.cleanUpRows();
 
-        _.slider.removeClass('slick-slider');
-        _.slider.removeClass('slick-initialized');
-        _.slider.removeClass('slick-dotted');
+        _.slider.classList.remove( 'slick-slider' );
+        _.slider.classList.remove( 'slick-initialized' );
+        _.slider.classList.remove( 'slick-dotted' );
 
         _.unslicked = true;
 
@@ -1249,9 +1249,9 @@
 
         const _ = this;
 
-        if ( ! _.slider[0].classList.contains( 'slick-initialized' ) ) {
+        if ( ! _.slider.classList.contains( 'slick-initialized' ) ) {
 
-            _.slider[0].classList.add( 'slick-initialized' );
+            _.slider.classList.add( 'slick-initialized' );
 
             _.buildRows();
             _.buildOut();
@@ -1608,7 +1608,7 @@
             opacity: '1'
         });
 
-        _.slider.removeClass('slick-loading');
+        _.slider.classList.remove('slick-loading');
 
         _.initUI();
 
@@ -2186,9 +2186,9 @@
         _.positionProp = _.options.vertical === true ? 'top' : 'left';
 
         if (_.positionProp === 'top') {
-            _.slider.addClass('slick-vertical');
+            _.slider.classList.add( 'slick-vertical' );
         } else {
-            _.slider.removeClass('slick-vertical');
+            _.slider.classList.remove( 'slick-vertical' );
         }
 
         if (bodyStyle.transition !== undefined) {
@@ -2547,7 +2547,7 @@
 
         }
 
-        _.slider.addClass('slick-loading');
+        _.slider.classList.add( 'slick-loading' );
 
     };
 
