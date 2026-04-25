@@ -131,7 +131,7 @@
                 unslicked: false
             };
 
-            $.extend(_, _.initials);
+            Object.assign( _, _.initials );
 
             _.activeBreakpoint = null;
             _.animType = null;
@@ -157,7 +157,7 @@
 
             dataSettings = $(element).data('slick') || {};
 
-            _.options = $.extend({}, _.defaults, settings, dataSettings);
+            _.options = Object.assign( {}, _.defaults, settings, dataSettings );
 
             _.currentSlide = _.options.initialSlide;
 
@@ -637,7 +637,7 @@
                         if (_.breakpointSettings[targetBreakpoint] === 'unslick') {
                             _.unslick(targetBreakpoint);
                         } else {
-                            _.options = $.extend({}, _.originalSettings,
+                            _.options = Object.assign( {}, _.originalSettings,
                                 _.breakpointSettings[
                                     targetBreakpoint]);
                             if (initial === true) {
@@ -652,7 +652,7 @@
                     if (_.breakpointSettings[targetBreakpoint] === 'unslick') {
                         _.unslick(targetBreakpoint);
                     } else {
-                        _.options = $.extend({}, _.originalSettings,
+                        _.options = Object.assign({}, _.originalSettings,
                             _.breakpointSettings[
                                 targetBreakpoint]);
                         if (initial === true) {
@@ -1867,7 +1867,7 @@
 
         _.destroy(true);
 
-        $.extend(_, _.initials, { currentSlide: currentSlide });
+        Object.assign( _, _.initials, { currentSlide: currentSlide } );
 
         _.init();
 
