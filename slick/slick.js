@@ -647,7 +647,7 @@
 
             // only trigger breakpoints during an actual break. not on initialize.
             if( !initial && triggerBreakpoint !== false ) {
-                _.slider.trigger('breakpoint', [_, triggerBreakpoint]);
+                _.slider.dispatchEvent( new CustomEvent( 'breakpoint', { detail: [_, triggerBreakpoint] } ) );
             }
         }
 
@@ -883,7 +883,7 @@
         _.unslicked = true;
 
         if(!refresh) {
-            _.slider.trigger('destroy', [_]);
+            _.slider.dispatchEvent( new CustomEvent( 'destroy', { detail: [ _ ] } ) );
         }
 
     };
@@ -1262,7 +1262,7 @@
             _.focusHandler();
         }
 
-        if ( creation ) _.slider.trigger( 'init', [_] );
+        if ( creation ) _.slider.dispatchEvent( new CustomEvent( 'init', { detail: [ _ ] } ) );
 
         if ( true === _.options.accessibility ) _.initADA();
 
@@ -1551,7 +1551,7 @@
 
         if( !_.unslicked ) {
 
-            _.slider.trigger('afterChange', [_, index]);
+            _.slider.dispatchEvent( new CustomEvent( 'afterChange', { detail: [_, index] } ) );
 
             _.animating = false;
 
@@ -1721,7 +1721,7 @@
         _.paused = !_.options.autoplay;
         _.autoPlay();
 
-        _.slider.trigger('reInit', [_]);
+        _.slider.dispatchEvent( new CustomEvent( 'reInit', { detail: [ _ ] } ) );
 
     };
 
@@ -1975,7 +1975,7 @@
             _.setFade();
         }
 
-        _.slider.trigger('setPosition', [_]);
+        _.slider.dispatchEvent( new CustomEvent( 'setPosition', { detail: [ _ ] } ) );
 
     };
 
@@ -2281,7 +2281,7 @@
 
         _.animating = true;
 
-        _.slider.trigger('beforeChange', [_, _.currentSlide, animSlide]);
+        _.slider.dispatchEvent( new CustomEvent( 'beforeChange', { detail: [_, _.currentSlide, animSlide] } ) );
 
         oldSlide = _.currentSlide;
         _.currentSlide = animSlide;
@@ -2405,7 +2405,7 @@
         }
 
         if ( _.touchObject.edgeHit === true ) {
-            _.slider.trigger('edge', [_, _.swipeDirection() ]);
+            _.slider.dispatchEvent( new CustomEvent( 'edge', { detail: [_, _.swipeDirection() ] } ) );
         }
 
         if ( _.touchObject.swipeLength >= _.touchObject.minSwipe ) {
@@ -2447,7 +2447,7 @@
 
                 _.slideHandler( slideCount );
                 _.touchObject = {};
-                _.slider.trigger('swipe', [_, direction ]);
+                _.slider.dispatchEvent( new CustomEvent( 'swipe', { detail: [_, direction ] } ) );
 
             }
 
@@ -2650,7 +2650,7 @@
     Slick.prototype.unslick = function(fromBreakpoint) {
 
         var _ = this;
-        _.slider.trigger('unslick', [_, fromBreakpoint]);
+        _.slider.dispatchEvent( new CustomEvent( 'unslick', { detail: [_, fromBreakpoint] } ) );
         _.destroy();
 
     };
