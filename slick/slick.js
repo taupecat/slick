@@ -2153,28 +2153,20 @@
 
         var _ = this, l, item, option, value, refresh = false, type;
 
-        if( $.isPlainObject( arguments[0] ) ) {
-
-            option =  arguments[0];
+        if ( Object.prototype.toString.call( arguments[0] ) === '[object Object]' ) {
+            option  = arguments[0];
             refresh = arguments[1];
-            type = 'multiple';
-
+            type    = 'multiple';
         } else if ( typeof arguments[0] === 'string' ) {
-
-            option =  arguments[0];
-            value = arguments[1];
+            option  = arguments[0];
+            value   = arguments[1];
             refresh = arguments[2];
 
             if ( arguments[0] === 'responsive' && Array.isArray( arguments[1] ) ) {
-
                 type = 'responsive';
-
             } else if ( typeof arguments[1] !== 'undefined' ) {
-
                 type = 'single';
-
             }
-
         }
 
         if ( type === 'single' ) {
@@ -2184,10 +2176,8 @@
 
         } else if ( type === 'multiple' ) {
 
-            $.each( option , function( opt, val ) {
-
+            Object.entries( option ).forEach( ( [opt, val] ) => {
                 _.options[opt] = val;
-
             });
 
 
