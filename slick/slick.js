@@ -17,6 +17,16 @@
 /* global window, document, define, jQuery, setInterval, clearInterval */
 (function($) {
     'use strict';
+
+    const parseBreakpoint = (value) => {
+        if (typeof value === 'number') return value;
+        const str = String(value).trim();
+        if (str.slice(-2) === 'em') {
+            return parseFloat(str) * 16;
+        }
+        return parseFloat(str); // handles '992px' or bare strings
+    };
+
     var Slick = window.Slick || {};
 
     Slick = (function() {
@@ -593,7 +603,7 @@
                             targetBreakpoint = _.breakpoints[breakpoint];
                         }
                     } else {
-                        if (respondToWidth > _.breakpoints[breakpoint]) {
+                        if (respondToWidth >= _.breakpoints[breakpoint]) {
                             targetBreakpoint = _.breakpoints[breakpoint];
                         }
                     }
@@ -1854,19 +1864,19 @@
 
                 if (responsiveSettings.hasOwnProperty(breakpoint)) {
                     currentBreakpoint = responsiveSettings[breakpoint].breakpoint;
+                    const parsedBreakpoint = parseBreakpoint( currentBreakpoint );
 
                     // loop through the breakpoints and cut out any existing
                     // ones with the same breakpoint number, we don't want dupes.
                     while( l >= 0 ) {
-                        if( _.breakpoints[l] && _.breakpoints[l] === currentBreakpoint ) {
+                        if( _.breakpoints[l] && _.breakpoints[l] === parsedBreakpoint ) {
                             _.breakpoints.splice(l,1);
                         }
                         l--;
                     }
 
-                    _.breakpoints.push(currentBreakpoint);
-                    _.breakpointSettings[currentBreakpoint] = responsiveSettings[breakpoint].settings;
-
+                    _.breakpoints.push( parsedBreakpoint );
+                    _.breakpointSettings[parsedBreakpoint] = responsiveSettings[breakpoint].settings;
                 }
 
             }
