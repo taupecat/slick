@@ -1,18 +1,11 @@
-/*
-     _ _      _       _
- ___| (_) ___| | __  (_)___
-/ __| | |/ __| |/ /  | / __|
-\__ \ | | (__|   < _ | \__ \
-|___/_|_|\___|_|\_(_)/ |___/
-                   |__/
-
- Version: 1.8.1
-  Author: Ken Wheeler
- Website: http://kenwheeler.github.io
-    Docs: http://kenwheeler.github.io/slick
-    Repo: http://github.com/kenwheeler/slick
-  Issues: http://github.com/kenwheeler/slick/issues
-
+/**
+ * Version: 2.0.0
+ *  Origin: Ken Wheeler (kenwheeler/slick v1.8.1)
+ *    Fork: Tracy Rotton (taupecat/slick)
+ *    Repo: http://github.com/taupecat/slick
+ *   Notes: Ported from jQuery to vanilla JavaScript.
+ *          jQuery dependency removed entirely.
+ *          Initialized via window.slick() instead of $.fn.slick().
  */
 ( function() {
     'use strict';
@@ -23,7 +16,7 @@
         if (str.slice(-2) === 'em') {
             return parseFloat(str) * 16;
         }
-        return parseFloat(str); // handles '992px' or bare strings
+        return parseFloat(str); // Handles '992px' or bare strings.
     };
 
     var Slick = window.Slick || {};
@@ -532,7 +525,7 @@
 	Slick.prototype.buildRows = function() {
 
 		const _ = this;
-		
+
 		let a, b, c, newSlides, numOfSlides, originalSlides,slidesPerSection;
 
 		newSlides      = document.createDocumentFragment();
@@ -645,7 +638,8 @@
                 }
             }
 
-            // only trigger breakpoints during an actual break. not on initialize.
+            // Only trigger breakpoints during an actual break. Not on
+            // initialize.
             if( !initial && triggerBreakpoint !== false ) {
                 _.slider.dispatchEvent( new CustomEvent( 'breakpoint', { detail: [_, triggerBreakpoint] } ) );
             }
@@ -689,7 +683,7 @@
 			const firstFocusable = target.querySelector( 'button, a, input, select' );
 
 			if ( firstFocusable ) firstFocusable.focus();
-			
+
 			break;
 		}
 
@@ -1370,8 +1364,8 @@
 
 		const _ = this;
 
-			// Dont slide if the cursor is inside the form fields and arrow keys
-			// are pressed.
+		// Dont slide if the cursor is inside the form fields and arrow keys are
+		// pressed.
 
 		if ( ! event.target.tagName.match( 'TEXTAREA|INPUT|SELECT' ) ) {
 			if ( 37 === event.keyCode && true === _.options.accessibility ) _.prev();
@@ -1450,8 +1444,6 @@
 				_.initADA();
 
 				if ( _.options.focusOnChange ) {
-					// var $currentSlide = $(_.slides.get(_.currentSlide));
-					// $currentSlide.attr('tabindex', 0).trigger('focus');
 					_.slides[_.currentSlide].setAttribute( 'tabindex', '0' );
 					_.slides[_.currentSlide].focus();
 				}
@@ -1479,16 +1471,16 @@
 	Slick.prototype.refresh = function( initializing ) {
 
 		const _ = this;
-		
+
 		let currentSlide, lastVisibleIndex;
 
 		lastVisibleIndex = _.slideCount - _.options.slidesToShow;
 
-		// in non-infinite sliders, we don't want to go past the
-		// last visible index.
+		// In non-infinite sliders, we don't want to go past the last visible
+		// index.
 		if ( ! _.options.infinite && ( _.currentSlide > lastVisibleIndex ) ) _.currentSlide = lastVisibleIndex;
 
-		// if less slides than to show, go to start.
+		// If less slides than to show, go to start.
 		if ( _.slideCount <= _.options.slidesToShow ) _.currentSlide = 0;
 
 		currentSlide = _.currentSlide;
@@ -1519,8 +1511,9 @@
                     currentBreakpoint = responsiveSettings[breakpoint].breakpoint;
                     const parsedBreakpoint = parseBreakpoint( currentBreakpoint );
 
-                    // loop through the breakpoints and cut out any existing
-                    // ones with the same breakpoint number, we don't want dupes.
+                    // Loop through the breakpoints and cut out any existing
+                    // ones with the same breakpoint number, we don't want
+                    // dupes.
                     while( l >= 0 ) {
                         if( _.breakpoints[l] && _.breakpoints[l] === parsedBreakpoint ) {
                             _.breakpoints.splice(l,1);
@@ -1768,7 +1761,8 @@
 
                     l = _.options.responsive.length-1;
 
-                    // loop through the responsive object and splice out duplicates.
+                    // Loop through the responsive object and splice out
+                    // duplicates.
                     while( l >= 0 ) {
 
                         if( _.options.responsive[l].breakpoint === value[item].breakpoint ) {
@@ -1864,14 +1858,6 @@
 		const _ = this;
 		let centerOffset, indexOffset, remainder;
 
-		// allSlides = _.slider
-		// 	.find('.slick-slide')
-		// 	.removeClass('slick-active slick-center slick-current')
-		// 	.attr('aria-hidden', 'true');
-
-		// _.slides
-		// 	.eq(index)
-		// 	.addClass('slick-current');
 		const allSlides = Array.from( _.slider.querySelectorAll( '.slick-slide' ) );
 		allSlides.forEach( el => {
 			el.classList.remove( 'slick-active', 'slick-center', 'slick-current' );
@@ -1895,20 +1881,12 @@
 			if ( true === _.options.infinite ) {
 
 				if ( index >= centerOffset && index <= ( _.slideCount - 1 ) - centerOffset ) {
-					// _.slides
-					// 	.slice(index - centerOffset + evenCoef, index + centerOffset + 1)
-					// 	.addClass('slick-active')
-					// 	.attr('aria-hidden', 'false');
 					_.slides.slice( index - centerOffset + evenCoef, index + centerOffset + 1 ).forEach( el => {
 						el.classList.add( 'slick-active' );
 						el.setAttribute( 'aria-hidden', 'false' );
 					});
 				} else {
 					indexOffset = _.options.slidesToShow + index;
-					// allSlides
-					// 	.slice(indexOffset - centerOffset + 1 + evenCoef, indexOffset + centerOffset + 2)
-					// 	.addClass('slick-active')
-					// 	.attr('aria-hidden', 'false');
 					allSlides.slice( indexOffset - centerOffset + 1 + evenCoef, indexOffset + centerOffset + 2 ).forEach( el => {
 						el.classList.add( 'slick-active' );
 						el.setAttribute( 'aria-hidden', 'false' );
@@ -1916,39 +1894,23 @@
 				}
 
 				if ( 0 === index ) {
-					// allSlides
-					// 	.eq( _.options.slidesToShow + _.slideCount + 1 )
-					// 	.addClass('slick-center');
 					allSlides[_.options.slidesToShow + _.slideCount + 1].classList.add( 'slick-center' );
 				} else if ( _.slideCount - 1 === index ) {
-					// allSlides
-					// 	.eq(_.options.slidesToShow)
-					// 	.addClass('slick-center');
 					allSlides[_.options.slidesToShow].classList.add( 'slick-center' );
 				}
 			}
 
-			// _.slides
-			// 	.eq(index)
-			// 	.addClass('slick-center');
 			_.slides[index].classList.add( 'slick-center' );
 		} else {
 
 			if (index >= 0 && index <= (_.slideCount - _.options.slidesToShow)) {
 
-				// _.slides
-				// 	.slice(index, index + _.options.slidesToShow)
-				// 	.addClass('slick-active')
-				// 	.attr('aria-hidden', 'false');
 				_.slides.slice(index, index + _.options.slidesToShow).forEach( el => {
 					el.classList.add( 'slick-active' );
 					el.setAttribute( 'aria-hidden', 'false' );
 				});
 			} else if ( allSlides.length <= _.options.slidesToShow ) {
 
-				// allSlides
-				// 	.addClass('slick-active')
-				// 	.attr('aria-hidden', 'false');
 				allSlides.forEach( el => {
 					el.classList.add( 'slick-active' );
 					el.setAttribute( 'aria-hidden', 'false' );
@@ -1959,20 +1921,12 @@
 
 				if ( _.options.slidesToShow == _.options.slidesToScroll && ( _.slideCount - index) < _.options.slidesToShow ) {
 
-					// allSlides
-					// 	.slice(indexOffset - (_.options.slidesToShow - remainder), indexOffset + remainder)
-					// 	.addClass('slick-active')
-					// 	.attr('aria-hidden', 'false');
 					allSlides.slice( indexOffset - ( _.options.slidesToShow - remainder ), indexOffset + remainder ).forEach( el => {
 						el.classList.add( 'slick-active' );
 						el.setAttribute( 'aria-hidden', 'false' );
 					});
 				} else {
 
-					// allSlides
-					// 	.slice(indexOffset, indexOffset + _.options.slidesToShow)
-					// 	.addClass('slick-active')
-					// 	.attr('aria-hidden', 'false');
 					allSlides.slice( indexOffset, indexOffset + _.options.slidesToShow ).forEach( el => {
 						el.classList.add( 'slick-active' );
 						el.setAttribute( 'aria-hidden', 'false' );
@@ -2137,11 +2091,13 @@
         if ( _.options.asNavFor ) {
 
             navTarget = _.getNavTarget();
-            navTarget = navTarget.slick('getSlick');
 
-            if ( navTarget.slideCount <= navTarget.options.slidesToShow ) {
-                navTarget.setSlideClasses(_.currentSlide);
-            }
+            navTarget.forEach( el => {
+                const nav = el.slick;
+                if ( nav && nav.slideCount <= nav.options.slidesToShow ) {
+                    nav.setSlideClasses( _.currentSlide );
+                }
+            } );
 
         }
 
@@ -2499,7 +2455,7 @@
 	Slick.prototype.updateArrows = function() {
 
 		const _ = this;
-		
+
 		let centerOffset;
 
 		centerOffset = Math.floor( _.options.slidesToShow / 2 );
