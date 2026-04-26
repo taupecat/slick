@@ -14,45 +14,40 @@
 
 	const parseBreakpoint = ( value ) => {
 		if ( 'number' === typeof value ) return value;
+
 		const str = String( value ).trim();
-		if ( 'em' === str.slice( -2 ) ) {
-			return parseFloat( str ) * 16;
-		}
+
+		if ( 'em' === str.slice( -2 ) ) return parseFloat( str ) * 16;
+
 		return parseFloat( str ); // Handles '992px' or bare strings.
 	};
 
-	var Slick = window.Slick || {};
+	let Slick = window.Slick || {};
 
 	Slick = ( function() {
 
-		var instanceUid = 0;
+		let instanceUid = 0;
 
 		function Slick( element, settings ) {
 
 			const _ = this;
+
 			let dataSettings;
 
 			_.defaults = {
-				accessibility : true,
-				adaptiveHeight: false,
-				appendArrows  : element,
-				appendDots    : element,
-				arrows        : true,
-				asNavFor      : null,
-				prevArrow     : '<button class="slick-prev" aria-label="Previous" type="button">Previous</button>',
-				nextArrow     : '<button class="slick-next" aria-label="Next" type="button">Next</button>',
-				autoplay      : false,
-				autoplaySpeed : 3000,
-				centerMode    : false,
-				centerPadding : '50px',
-				cssEase       : 'ease',
-
-				customPaging: ( slider, i ) => {
-					const btn = document.createElement( 'button' );
-					btn.type        = 'button';
-					btn.textContent = i + 1;
-					return btn;
-				},
+				accessibility   : true,
+				adaptiveHeight  : false,
+				appendArrows    : element,
+				appendDots      : element,
+				arrows          : true,
+				asNavFor        : null,
+				prevArrow       : '<button class="slick-prev" aria-label="Previous" type="button">Previous</button>',
+				nextArrow       : '<button class="slick-next" aria-label="Next" type="button">Next</button>',
+				autoplay        : false,
+				autoplaySpeed   : 3000,
+				centerMode      : false,
+				centerPadding   : '50px',
+				cssEase         : 'ease',
 				dots            : false,
 				dotsClass       : 'slick-dots',
 				draggable       : true,
@@ -85,7 +80,14 @@
 				vertical        : false,
 				verticalSwiping : false,
 				waitForAnimate  : true,
-				zIndex          : 1000
+				zIndex          : 1000,
+
+				customPaging: ( slider, i ) => {
+					const btn = document.createElement( 'button' );
+					btn.type        = 'button';
+					btn.textContent = i + 1;
+					return btn;
+				},
 			};
 
 			_.initials = {
@@ -186,7 +188,6 @@
 	};
 
 	Slick.prototype.addSlide = Slick.prototype.slickAdd = function( markup, index, addBefore ) {
-
 		const _ = this;
 
 		if ( 'boolean' === typeof( index ) ) {
@@ -225,7 +226,6 @@
 	};
 
 	Slick.prototype.animateHeight = function() {
-
 		const _ = this;
 
 		if ( 1 === _.options.slidesToShow && true === _.options.adaptiveHeight && false === _.options.vertical ) {
@@ -237,7 +237,6 @@
 	};
 
 	Slick.prototype.animateSlide = function( targetLeft, callback ) {
-
 		const _ = this;
 
 		_.animateHeight();
@@ -259,17 +258,11 @@
 				const progress = Math.min( elapsed / _.options.speed, 1 );
 				const current  = Math.ceil( startLeft + distance * progress );
 
-				if ( false === _.options.vertical ) {
-					_.slideTrack.style[ _.animType ] = `translate( ${ current }px, 0 )`;
-				} else {
-					_.slideTrack.style[ _.animType ] = `translate( 0, ${ current }px )`;
-				}
+				if ( false === _.options.vertical ) _.slideTrack.style[ _.animType ] = `translate( ${ current }px, 0 )`;
+				else _.slideTrack.style[ _.animType ] = `translate( 0, ${ current }px )`;
 
-				if ( 1 > progress ) {
-					requestAnimationFrame( step );
-				} else if ( callback ) {
-					callback.call();
-				}
+				if ( 1 > progress ) requestAnimationFrame( step );
+				else if ( callback ) callback.call();
 			};
 
 			requestAnimationFrame( step );
@@ -279,11 +272,8 @@
 			_.applyTransition();
 			targetLeft = Math.ceil( targetLeft );
 
-			if ( false === _.options.vertical ) {
-				_.slideTrack.style[ _.animType ] = `translate3d( ${ targetLeft }px, 0, 0 )`;
-			} else {
-				_.slideTrack.style[ _.animType ] = `translate3d( 0, ${ targetLeft }px, 0 )`;
-			}
+			if ( false === _.options.vertical ) _.slideTrack.style[ _.animType ] = `translate3d( ${ targetLeft }px, 0, 0 )`;
+			else _.slideTrack.style[ _.animType ] = `translate3d( 0, ${ targetLeft }px, 0 )`;
 
 			if ( callback ) {
 				setTimeout( () => {
@@ -295,7 +285,6 @@
 	};
 
 	Slick.prototype.getNavTarget = function() {
-
 		const _ = this;
 
 		let asNavFor = _.options.asNavFor;
@@ -306,7 +295,6 @@
 	};
 
 	Slick.prototype.asNavFor = function( index ) {
-
 		const _ = this;
 
 		let asNavFor = _.getNavTarget();
@@ -325,7 +313,6 @@
 	};
 
 	Slick.prototype.applyTransition = function( slide ) {
-
 		const _          = this;
 		const transition = {};
 
@@ -337,30 +324,23 @@
 	};
 
 	Slick.prototype.autoPlay = function() {
-
-		var _ = this;
+		const _ = this;
 
 		_.autoPlayClear();
 
-		if ( _.options.autoplay && ! _.paused && _.slideCount > _.options.slidesToShow ) {
-			_.autoPlayTimer = setInterval( _.autoPlayIterator, _.options.autoplaySpeed );
-		}
-
+		if ( _.options.autoplay && ! _.paused && _.slideCount > _.options.slidesToShow ) _.autoPlayTimer = setInterval( _.autoPlayIterator, _.options.autoplaySpeed );
 	};
 
 	Slick.prototype.autoPlayClear = function() {
+		const _ = this;
 
-		var _ = this;
-
-		if ( _.autoPlayTimer ) {
-			clearInterval( _.autoPlayTimer );
-		}
+		if ( _.autoPlayTimer ) clearInterval( _.autoPlayTimer );
 	};
 
 	Slick.prototype.autoPlayIterator = function() {
+		const _ = this;
 
-		var _ = this,
-			slideTo = _.currentSlide + _.options.slidesToScroll;
+		let slideTo = _.currentSlide + _.options.slidesToScroll;
 
 		if ( ! _.paused && ! _.interrupted && ! _.focussed ) {
 
@@ -369,12 +349,9 @@
 				if ( 1 === _.direction && ( _.currentSlide + 1 ) === ( _.slideCount - 1 ) ) {
 					_.direction = 0;
 				} else if ( 0 === _.direction ) {
-
 					slideTo = _.currentSlide - _.options.slidesToScroll;
 
-					if ( 0 === _.currentSlide - 1 ) {
-						_.direction = 1;
-					}
+					if ( 0 === _.currentSlide - 1 ) _.direction = 1;
 				}
 			}
 
@@ -410,7 +387,6 @@
 			_.nextArrow.dataset.slickMessage = 'next';
 
 			if ( _.slideCount > _.options.slidesToShow ) {
-
 				_.prevArrow.classList.remove( 'slick-hidden' );
 				_.prevArrow.removeAttribute( 'aria-hidden' );
 				_.prevArrow.removeAttribute( 'tabindex' );
@@ -418,35 +394,26 @@
 				_.nextArrow.removeAttribute( 'aria-hidden' );
 				_.nextArrow.removeAttribute( 'tabindex' );
 
-				if ( _.htmlExpr.test( _.options.prevArrow ) ) {
-					_.options.appendArrows.insertBefore( _.prevArrow, _.options.appendArrows.firstChild );
-				}
+				if ( _.htmlExpr.test( _.options.prevArrow ) ) _.options.appendArrows.insertBefore( _.prevArrow, _.options.appendArrows.firstChild );
 
-				if ( _.htmlExpr.test( _.options.nextArrow ) ) {
-					_.options.appendArrows.appendChild( _.nextArrow );
-				}
+				if ( _.htmlExpr.test( _.options.nextArrow ) ) _.options.appendArrows.appendChild( _.nextArrow );
 
 				if ( true !== _.options.infinite ) {
 					_.prevArrow.classList.add( 'slick-disabled' );
 					_.prevArrow.setAttribute( 'aria-disabled', 'true' );
 				}
-
 			} else {
-
 				_.prevArrow.classList.add( 'slick-hidden' );
 				_.prevArrow.setAttribute( 'aria-disabled', 'true' );
 				_.prevArrow.setAttribute( 'tabindex', '-1' );
 				_.nextArrow.classList.add( 'slick-hidden' );
 				_.nextArrow.setAttribute( 'aria-disabled', 'true' );
 				_.nextArrow.setAttribute( 'tabindex', '-1' );
-
 			}
-
 		}
 	};
 
 	Slick.prototype.buildDots = function() {
-
 		const _ = this;
 
 		let i;
@@ -468,19 +435,16 @@
 
 			_.options.appendDots.appendChild( dot );
 			_.dots = dot;
-
 			_.dots.querySelector( 'li' ).classList.add( 'slick-active' );
 		}
 	};
 
 	Slick.prototype.buildOut = function() {
-
-		const _ = this;
-
+		const _        = this;
 		const selector = _.options.slide ? _.options.slide + ':not(.slick-cloned)' : ':scope > :not(.slick-cloned)';
+
 		_.slides = Array.from( _.slider.querySelectorAll( selector ) );
 		_.slides.forEach( el => el.classList.add( 'slick-slide' ) );
-
 		_.slideCount = _.slides.length;
 
 		_.slides.forEach( ( el, index ) => {
@@ -491,18 +455,23 @@
 		_.slider.classList.add( 'slick-slider' );
 
 		const track = document.createElement( 'div' );
+
 		track.className = 'slick-track';
+
 		if ( 0 === _.slideCount ) {
 			_.slider.appendChild( track );
 		} else {
 			_.slides[0].parentNode.insertBefore( track, _.slides[0] );
 			_.slides.forEach( el => track.appendChild( el ) );
 		}
+
 		_.slideTrack = track;
 
 		const list = document.createElement( 'div' );
+
 		list.className = 'slick-list';
 		_.slideTrack.parentNode.insertBefore( list, _.slideTrack );
+
 		list.appendChild( _.slideTrack );
 		_.list = list;
 
@@ -520,7 +489,6 @@
 	};
 
 	Slick.prototype.buildRows = function() {
-
 		const _ = this;
 
 		let a, b, c, newSlides, numOfSlides, originalSlides, slidesPerSection;
@@ -564,10 +532,10 @@
 
 	Slick.prototype.checkResponsive = function( initial, forceUpdate ) {
 
-		var _ = this,
-			breakpoint, targetBreakpoint, respondToWidth, triggerBreakpoint = false;
-		var sliderWidth = _.slider.offsetWidth;
-		var windowWidth = window.innerWidth;
+		const _ = this;
+		let breakpoint, targetBreakpoint, respondToWidth, triggerBreakpoint = false;
+		const sliderWidth = _.slider.offsetWidth;
+		const windowWidth = window.innerWidth;
 
 		if ( 'window' === _.respondTo ) {
 			respondToWidth = windowWidth;
@@ -699,8 +667,8 @@
 
 	Slick.prototype.checkNavigable = function( index ) {
 
-		var _ = this,
-			navigables, prevNavigable;
+		const _ = this;
+		let navigables, prevNavigable;
 
 		navigables    = _.getNavigableIndexes();
 		prevNavigable = 0;
@@ -708,7 +676,7 @@
 		if ( index > navigables[navigables.length - 1] ) {
 			index = navigables[navigables.length - 1];
 		} else {
-			for ( var n in navigables ) {
+			for ( let n in navigables ) {
 				if ( index < navigables[n] ) {
 					index = prevNavigable;
 					break;
@@ -789,7 +757,7 @@
 
 	Slick.prototype.clickHandler = function( event ) {
 
-		var _ = this;
+		const _ = this;
 
 		if ( false === _.shouldClick ) {
 			event.stopImmediatePropagation();
@@ -958,17 +926,17 @@
 
 	Slick.prototype.getCurrent = Slick.prototype.slickCurrentSlide = function() {
 
-		var _ = this;
+		const _ = this;
 		return _.currentSlide;
 	};
 
 	Slick.prototype.getDotCount = function() {
 
-		var _ = this;
+		const _ = this;
 
-		var breakPoint = 0;
-		var counter    = 0;
-		var pagerQty   = 0;
+		let breakPoint = 0;
+		let counter    = 0;
+		let pagerQty   = 0;
 
 		if ( true === _.options.infinite ) {
 			if ( _.slideCount <= _.options.slidesToShow ) {
@@ -998,8 +966,8 @@
 
 	Slick.prototype.getLeft = function( slideIndex ) {
 
-		var _ = this,
-			targetLeft,
+		const _ = this;
+		let targetLeft,
 			verticalHeight,
 			verticalOffset = 0,
 			targetSlide,
@@ -1096,18 +1064,18 @@
 
 	Slick.prototype.getOption = Slick.prototype.slickGetOption = function( option ) {
 
-		var _ = this;
+		const _ = this;
 
 		return _.options[option];
 	};
 
 	Slick.prototype.getNavigableIndexes = function() {
 
-		var _ = this,
-			breakPoint = 0,
+		const _ = this;
+		let breakPoint = 0,
 			counter = 0,
-			indexes = [],
 			max;
+		const indexes = [];
 
 		if ( false === _.options.infinite ) {
 			max = _.slideCount;
@@ -1209,7 +1177,7 @@
 	};
 
 	Slick.prototype.initADA = function() {
-		var _ = this,
+		const _ = this,
 			numDotGroups = Math.ceil( _.slideCount / _.options.slidesToScroll ),
 			tabControlIndexes = _.getNavigableIndexes().filter( function( val ) {
 				return ( 0 <= val ) && ( val < _.slideCount );
@@ -1405,7 +1373,7 @@
 
 	Slick.prototype.orientationChange = function() {
 
-		var _ = this;
+		const _ = this;
 
 		_.checkResponsive();
 		_.setPosition();
@@ -1413,7 +1381,7 @@
 
 	Slick.prototype.pause = Slick.prototype.slickPause = function() {
 
-		var _ = this;
+		const _ = this;
 
 		_.autoPlayClear();
 		_.paused = true;
@@ -1421,7 +1389,7 @@
 
 	Slick.prototype.play = Slick.prototype.slickPlay = function() {
 
-		var _ = this;
+		const _ = this;
 
 		_.paused      = false;
 		_.focussed    = false;
@@ -1499,8 +1467,9 @@
 
 	Slick.prototype.registerBreakpoints = function() {
 
-		var _ = this, breakpoint, currentBreakpoint, l,
-			responsiveSettings = _.options.responsive || null;
+		const _ = this;
+		let breakpoint, currentBreakpoint, l;
+		const responsiveSettings = _.options.responsive || null;
 
 		if ( Array.isArray( responsiveSettings ) && responsiveSettings.length ) {
 
@@ -1721,7 +1690,8 @@
 		 *     .slick("setOption", { 'option': value, ... }, refresh )
 		 */
 
-		var _ = this, l, item, option, value, refresh = false, type;
+		const _ = this;
+		let l, item, option, value, refresh = false, type;
 
 		if ( '[object Object]' === Object.prototype.toString.call( arguments[0] ) ) {
 			option  = arguments[0];
@@ -1779,7 +1749,7 @@
 
 	Slick.prototype.setPosition = function() {
 
-		var _ = this;
+		const _ = this;
 
 		_.setDimensions();
 		_.setHeight();
@@ -1795,7 +1765,7 @@
 
 	Slick.prototype.setProps = function() {
 
-		var _ = this,
+		const _ = this,
 			bodyStyle = document.body.style;
 
 		_.positionProp = true === _.options.vertical ? 'top' : 'left';
@@ -1967,7 +1937,7 @@
 
 	Slick.prototype.interrupt = function( toggle ) {
 
-		var _ = this;
+		const _ = this;
 
 		if ( ! toggle ) {
 			_.autoPlay();
@@ -1995,8 +1965,8 @@
 
 	Slick.prototype.slideHandler = function( index, sync, dontAnimate ) {
 
-		var targetSlide, animSlide, oldSlide, slideLeft, targetLeft = null,
-			_ = this, navTarget;
+		const _ = this;
+		let targetSlide, animSlide, oldSlide, slideLeft, targetLeft = null, navTarget;
 
 		sync = sync || false;
 
@@ -2116,7 +2086,7 @@
 
 	Slick.prototype.startLoad = function() {
 
-		var _ = this;
+		const _ = this;
 
 		if ( true === _.options.arrows && _.slideCount > _.options.slidesToShow ) {
 			_.prevArrow.style.display = 'none';
@@ -2132,7 +2102,8 @@
 
 	Slick.prototype.swipeDirection = function() {
 
-		var xDist, yDist, r, swipeAngle, _ = this;
+		const _ = this;
+		let xDist, yDist, r, swipeAngle;
 
 		xDist = _.touchObject.startX - _.touchObject.curX;
 		yDist = _.touchObject.startY - _.touchObject.curY;
@@ -2170,8 +2141,8 @@
 
 	Slick.prototype.swipeEnd = function( event ) {
 
-		var _ = this,
-			slideCount,
+		const _ = this;
+		let slideCount,
 			direction;
 
 		_.dragging = false;
@@ -2249,7 +2220,7 @@
 
 	Slick.prototype.swipeHandler = function( event ) {
 
-		var _ = this;
+		const _ = this;
 
 		if ( ( false === _.options.swipe ) || ( 'ontouchend' in document && false === _.options.swipe ) ) {
 			return;
@@ -2291,8 +2262,8 @@
 
 	Slick.prototype.swipeMove = function( event ) {
 
-		var _ = this,
-			curLeft, swipeDirection, swipeLength, positionOffset, touches, verticalSwipeLength;
+		const _ = this;
+		let curLeft, swipeDirection, swipeLength, positionOffset, touches, verticalSwipeLength;
 
 		touches = event.touches !== undefined ? event.touches : null;
 
@@ -2367,8 +2338,8 @@
 
 	Slick.prototype.swipeStart = function( event ) {
 
-		var _ = this,
-			touches;
+		const _ = this;
+		let touches;
 
 		_.interrupted = true;
 
@@ -2423,7 +2394,7 @@
 
 	Slick.prototype.unslick = function( fromBreakpoint ) {
 
-		var _ = this;
+		const _ = this;
 		_.slider.dispatchEvent( new CustomEvent( 'unslick', { detail: [_, fromBreakpoint] }) );
 		_.destroy();
 
@@ -2478,7 +2449,7 @@
 
 	Slick.prototype.visibility = function() {
 
-		var _ = this;
+		const _ = this;
 
 		if ( _.options.autoplay ) {
 
