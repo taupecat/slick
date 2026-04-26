@@ -1,0 +1,86 @@
+import { defineConfig } from "eslint/config";
+import alignAssignments from "eslint-plugin-align-assignments";
+import globals from "globals";
+
+export default defineConfig([{
+    plugins: {
+        "align-assignments": alignAssignments,
+    },
+
+    languageOptions: {
+        globals: {
+            ...globals.browser,
+            ...globals.node,
+            ...globals.jquery,
+        },
+    },
+
+    rules: {
+        "align-assignments/align-assignments": 0,
+
+        "brace-style": [1, "1tbs"],
+
+        camelcase: [2, {
+            properties: "never",
+        }],
+
+        "comma-spacing": [1, {
+            before: false,
+            after: true,
+        }],
+
+        eqeqeq: 1,
+        "func-call-spacing": [1, "never"],
+        "func-names": 0,
+        indent: [2, "tab"],
+
+        "key-spacing": [1, {
+            mode: "minimum",
+            align: "colon",
+        }],
+
+        "keyword-spacing": [1, {
+            before: true,
+            after: true,
+        }],
+
+        "new-cap": 0,
+        "new-parens": 2,
+        "no-constant-condition": 1,
+        "no-irregular-whitespace": 1,
+        "no-mixed-spaces-and-tabs": 1,
+
+        "no-multiple-empty-lines": [1, {
+            max: 1,
+            maxEOF: 0,
+        }],
+
+        "no-new": 0,
+        "no-ternary": 0,
+        "no-underscore-dangle": 0,
+
+        "no-unused-vars": [1, {
+            vars: "local",
+            args: "none",
+        }],
+
+        "no-use-before-define": 0,
+        "one-var": 0,
+        quotes: [1, "single"],
+        semi: [2, "always"],
+        "space-before-blocks": 1,
+        "space-before-function-paren": [1, "never"],
+
+        "space-in-parens": [1, "always", {
+            exceptions: ["{}"],
+        }],
+
+        "space-infix-ops": [1, {
+            int32Hint: true,
+        }],
+
+        strict: 1,
+        "valid-jsdoc": 0,
+        yoda: [1, "always"],
+    },
+}]);
