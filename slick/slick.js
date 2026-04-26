@@ -145,7 +145,7 @@
 
 			_.options          = Object.assign({}, _.defaults, settings, dataSettings );
 			_.currentSlide     = _.options.initialSlide;
-			_.originalSettings = _.options;
+			_.originalSettings = Object.assign({}, _.options );
 			_.autoPlay         = _.autoPlay.bind( _ );
 			_.autoPlayClear    = _.autoPlayClear.bind( _ );
 			_.autoPlayIterator = _.autoPlayIterator.bind( _ );
@@ -342,7 +342,7 @@
 
 		_.autoPlayClear();
 
-		if ( _.slideCount > _.options.slidesToShow ) {
+		if ( _.options.autoplay && ! _.paused && _.slideCount > _.options.slidesToShow ) {
 			_.autoPlayTimer = setInterval( _.autoPlayIterator, _.options.autoplaySpeed );
 		}
 
@@ -548,10 +548,17 @@
 
 			while ( _.slider.firstChild ) _.slider.removeChild( _.slider.firstChild );
 			_.slider.appendChild( newSlides );
-			_.slider.querySelectorAll( '* > * > *' ).forEach( el => {
-				el.style.width   = `${ 100 / _.options.slidesPerRow }%`;
-				el.style.display = 'inline-block';
-			});
+
+			if ( 1 < _.options.slidesPerRow ) {
+				Array.from( _.slider.children ).forEach( slide => {
+					Array.from( slide.children ).forEach( row => {
+						Array.from( row.children ).forEach( el => {
+							el.style.width   = `${ 100 / _.options.slidesPerRow }%`;
+							el.style.display = 'inline-block';
+						});
+					});
+				});
+			}
 		}
 	};
 
@@ -1416,11 +1423,10 @@
 
 		var _ = this;
 
+		_.paused      = false;
+		_.focussed    = false;
+		_.interrupted = false;
 		_.autoPlay();
-		_.options.autoplay = true;
-		_.paused           = false;
-		_.focussed         = false;
-		_.interrupted      = false;
 	};
 
 	Slick.prototype.postSlide = function( index ) {
