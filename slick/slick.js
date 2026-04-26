@@ -230,86 +230,73 @@
 	};
 
 	Slick.prototype.animateHeight = function() {
+
 		const _ = this;
-		if (_.options.slidesToShow === 1 && _.options.adaptiveHeight === true && _.options.vertical === false) {
-			// var targetHeight = _.slides.eq(_.currentSlide).outerHeight(true);
+
+		if ( 1 === _.options.slidesToShow && true === _.options.adaptiveHeight && false === _.options.vertical ) {
 			const targetHeight = _.slides[_.currentSlide].offsetHeight;
-			_.list.animate({
-				height: targetHeight
-			}, _.options.speed);
+
+			_.list.style.transition = `height ${ _.options.speed }ms ${ _.options.cssEase }`;
+			_.list.style.height     = `${ targetHeight }px`;
 		}
 	};
 
-    Slick.prototype.animateSlide = function(targetLeft, callback) {
+    Slick.prototype.animateSlide = function( targetLeft, callback ) {
 
-        var animProps = {},
-            _ = this;
+        const _ = this;
 
         _.animateHeight();
 
-        if (_.transformsEnabled === false) {
-            if (_.options.vertical === false) {
-                _.slideTrack.animate({
-                    left: targetLeft
-                }, _.options.speed, _.options.easing, callback);
-            } else {
-                _.slideTrack.animate({
-                    top: targetLeft
-                }, _.options.speed, _.options.easing, callback);
-            }
+        if ( false === _.transformsEnabled ) {
+            const prop = false === _.options.vertical ? 'left' : 'top';
+            _.slideTrack.style.transition = `${ prop } ${ _.options.speed }ms ${ _.options.cssEase }`;
+            _.slideTrack.style[ prop ] = `${ targetLeft }px`;
+            if ( callback ) setTimeout( () => callback.call(), _.options.speed );
+
+        } else if ( false === _.cssTransitions ) {
+
+            const startLeft = _.currentLeft || 0;
+            const distance  = targetLeft - startLeft;
+            const startTime = performance.now();
+
+            const step = ( now ) => {
+                const elapsed  = now - startTime;
+                const progress = Math.min( elapsed / _.options.speed, 1 );
+                const current  = Math.ceil( startLeft + distance * progress );
+
+                if ( false === _.options.vertical ) {
+                    _.slideTrack.style[ _.animType ] = `translate( ${ current }px, 0 )`;
+                } else {
+                    _.slideTrack.style[ _.animType ] = `translate( 0, ${ current }px )`;
+                }
+
+                if ( 1 > progress ) {
+                    requestAnimationFrame( step );
+                } else if ( callback ) {
+                    callback.call();
+                }
+            };
+
+            requestAnimationFrame( step );
 
         } else {
 
-            if (_.cssTransitions === false) {
-                $({
-                    animStart: _.currentLeft
-                }).animate({
-                    animStart: targetLeft
-                }, {
-                    duration: _.options.speed,
-                    easing: _.options.easing,
-                    step: function(now) {
-                        now = Math.ceil(now);
-                        if (_.options.vertical === false) {
-                            animProps[_.animType] = 'translate(' + now + 'px, 0)';
-                            _.slideTrack.css(animProps);
-                        } else {
-                            animProps[_.animType] = 'translate(0, ' + now + 'px)';
-                            _.slideTrack.css(animProps);
-                        }
-                    },
-                    complete: function() {
-                        if (callback) {
-                            callback.call();
-                        }
-                    }
-                });
+            _.applyTransition();
+            targetLeft = Math.ceil( targetLeft );
 
+            if ( false === _.options.vertical ) {
+                _.slideTrack.style[ _.animType ] = `translate3d( ${ targetLeft }px, 0, 0 )`;
             } else {
-
-                _.applyTransition();
-                targetLeft = Math.ceil(targetLeft);
-
-                if (_.options.vertical === false) {
-                    animProps[_.animType] = 'translate3d(' + targetLeft + 'px, 0, 0)';
-                } else {
-                    animProps[_.animType] = 'translate3d(0, ' + targetLeft + 'px, 0)';
-                }
-                _.slideTrack.css(animProps);
-
-                if (callback) {
-                    setTimeout(function() {
-
-                        _.disableTransition();
-
-                        callback.call();
-                    }, _.options.speed);
-                }
-
+                _.slideTrack.style[ _.animType ] = `translate3d( 0, ${ targetLeft }px, 0 )`;
             }
 
+            if ( callback ) {
+                setTimeout( () => {
+                    _.disableTransition();
+                    callback.call();
+                }, _.options.speed );
+            }
         }
-
     };
 
     Slick.prototype.getNavTarget = function() {
@@ -891,23 +878,16 @@
 
 		if ( false === _.cssTransitions ) {
 
-			// _.slides.eq(slideIndex).css({
-			// 	zIndex: _.options.zIndex
-			// });
 			_.slides[slideIndex].style.zIndex = _.options.zIndex;
 
-			_.slides.eq(slideIndex).animate({
-				opacity: 1
-			}, _.options.speed, _.options.easing, callback);
+			_.slides[slideIndex].style.transition = `opacity ${ _.options.speed }ms ${ _.options.cssEase }`;
+			_.slides[slideIndex].style.opacity = 1;
+			if ( callback ) setTimeout( () => callback.call(), _.options.speed );
 
 		} else {
 
 			_.applyTransition( slideIndex );
 
-			// _.slides.eq(slideIndex).css({
-			// 	opacity: 1,
-			// 	zIndex: _.options.zIndex
-			// });
 			_.slides[slideIndex].style.opacity = 1;
 			_.slides[slideIndex].style.zIndex = _.options.zIndex;
 
@@ -928,19 +908,14 @@
 
 		if ( false === _.cssTransitions ) {
 
-			_.slides.eq(slideIndex).animate({
-				opacity: 0,
-				zIndex: _.options.zIndex - 2
-			}, _.options.speed, _.options.easing);
+			_.slides[slideIndex].style.transition = `opacity ${ _.options.speed }ms ${ _.options.cssEase }`;
+			_.slides[slideIndex].style.opacity = 0;
+			_.slides[slideIndex].style.zIndex = _.options.zIndex - 2;
 
 		} else {
 
 			_.applyTransition(slideIndex);
 
-			// _.slides.eq(slideIndex).css({
-			// 	opacity: 0,
-			// 	zIndex: _.options.zIndex - 2
-			// });
 			_.slides[slideIndex].style.opacity = 0;
 			_.slides[slideIndex].style.zIndex = _.options.zIndex - 2;
 		}
