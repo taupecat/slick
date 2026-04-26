@@ -158,6 +158,10 @@
 			_.keyHandler       = _.keyHandler.bind( _ );
 			_.instanceUid      = instanceUid++;
 
+			_.orientationChangeHandler = _.orientationChange.bind( _ );
+			_.resizeHandler            = _.resize.bind( _ );
+			_.visibilityHandler        = _.visibility.bind( _ );
+
 			// A simple way to check for HTML strings.
 			// Strict HTML recognition (must start with <).
 			// Extracted from jQuery v1.11 source.
@@ -718,70 +722,58 @@
         return index;
     };
 
-    Slick.prototype.cleanUpEvents = function() {
+	Slick.prototype.cleanUpEvents = function() {
+		if ( _.options.dots && null !== _.dots ) {
+			_.dots.querySelectorAll( 'li' ).forEach( li => {
+				li.removeEventListener( 'click', _.changeSlide );
+				li.removeEventListener( 'mouseenter', _.interrupt.bind( _, true ) );
+				li.removeEventListener( 'mouseleave', _.interrupt.bind( _, false ) );
+			});
 
-        var _ = this;
+			if ( true === _.options.accessibility ) _.dots.removeEventListener( 'keydown', _.keyHandler );
+		}
 
-        if (_.options.dots && _.dots !== null) {
+		_.slider.removeEventListener( 'focus', _.focusHandler );
+		_.slider.removeEventListener( 'blur',  _.focusHandler );
 
-            $('li', _.dots)
-                .off('click.slick', _.changeSlide)
-                .off( 'mouseenter.slick', _.interrupt.bind( _, true ) )
-                .off( 'mouseleave.slick', _.interrupt.bind( _, false ) );
+		if ( true === _.options.arrows && _.slideCount > _.options.slidesToShow ) {
+			if ( _.prevArrow ) _.prevArrow.removeEventListener( 'click', _.changeSlide );
+			if ( _.nextArrow ) _.nextArrow.removeEventListener( 'click', _.changeSlide );
+			if ( true === _.options.accessibility ) {
+				if ( _.prevArrow ) _.prevArrow.removeEventListener( 'keydown', _.keyHandler );
+				if ( _.nextArrow ) _.nextArrow.removeEventListener( 'keydown', _.keyHandler );
+			}
+		}
 
-            if (_.options.accessibility === true) {
-                _.dots.off('keydown.slick', _.keyHandler);
-            }
-        }
+		_.list.removeEventListener( 'touchstart', _.swipeHandler );
+		_.list.removeEventListener( 'mousedown',  _.swipeHandler );
+		_.list.removeEventListener( 'touchmove',  _.swipeHandler );
+		_.list.removeEventListener( 'mousemove',  _.swipeHandler );
+		_.list.removeEventListener( 'touchend',   _.swipeHandler );
+		_.list.removeEventListener( 'mouseup',    _.swipeHandler );
+		_.list.removeEventListener( 'touchcancel',_.swipeHandler );
+		_.list.removeEventListener( 'mouseleave', _.swipeHandler );
+		_.list.removeEventListener( 'click',      _.clickHandler );
 
-        _.slider.off('focus.slick blur.slick');
+		document.removeEventListener( _.visibilityChange, _.visibilityHandler );
 
-        if (_.options.arrows === true && _.slideCount > _.options.slidesToShow) {
-            _.prevArrow && _.prevArrow.off('click.slick', _.changeSlide);
-            _.nextArrow && _.nextArrow.off('click.slick', _.changeSlide);
+		_.cleanUpSlideEvents();
 
-            if (_.options.accessibility === true) {
-                _.prevArrow && _.prevArrow.off('keydown.slick', _.keyHandler);
-                _.nextArrow && _.nextArrow.off('keydown.slick', _.keyHandler);
-            }
-        }
+		if ( true === _.options.accessibility ) _.list.removeEventListener( 'keydown', _.keyHandler );
 
-        _.list.off('touchstart.slick mousedown.slick', _.swipeHandler);
-        _.list.off('touchmove.slick mousemove.slick', _.swipeHandler);
-        _.list.off('touchend.slick mouseup.slick', _.swipeHandler);
-        _.list.off('touchcancel.slick mouseleave.slick', _.swipeHandler);
+		if ( true === _.options.focusOnSelect ) Array.from( _.slideTrack.children ).forEach( el => el.removeEventListener( 'click', _.selectHandler ) );
 
-        _.list.off('click.slick', _.clickHandler);
+		window.removeEventListener( 'orientationchange', _.orientationChangeHandler );
+		window.removeEventListener( 'resize', _.resizeHandler );
+		window.removeEventListener( 'load', _.setPosition );
+	};
 
-        $(document).off(_.visibilityChange, _.visibility);
+	Slick.prototype.cleanUpSlideEvents = function() {
 
-        _.cleanUpSlideEvents();
+        const _ = this;
 
-        if (_.options.accessibility === true) {
-            _.list.off('keydown.slick', _.keyHandler);
-        }
-
-        if (_.options.focusOnSelect === true) {
-            $(_.slideTrack).children().off('click.slick', _.selectHandler);
-        }
-
-        $(window).off('orientationchange.slick.slick-' + _.instanceUid, _.orientationChange);
-
-        $(window).off('resize.slick.slick-' + _.instanceUid, _.resize);
-
-        $('[draggable!=true]', _.slideTrack).off('dragstart', _.preventDefault);
-
-        $(window).off('load.slick.slick-' + _.instanceUid, _.setPosition);
-
-    };
-
-    Slick.prototype.cleanUpSlideEvents = function() {
-
-        var _ = this;
-
-        _.list.off( 'mouseenter.slick', _.interrupt.bind( _, true ) );
-        _.list.off( 'mouseleave.slick', _.interrupt.bind( _, false ) );
-
+		_.list.removeEventListener( 'mouseenter', _.interrupt.bind( _, true ) );
+		_.list.removeEventListener( 'mouseleave', _.interrupt.bind( _, false ) );
     };
 
     Slick.prototype.cleanUpRows = function() {
@@ -974,42 +966,29 @@
 
     };
 
-    Slick.prototype.focusHandler = function() {
+	Slick.prototype.focusHandler = function() {
 
-        var _ = this;
+		const _ = this;
 
-        // If any child element receives focus within the slider we need to pause the autoplay
-        _.slider
-            .off('focus.slick blur.slick')
-            .on(
-                'focus.slick',
-                '*', 
-                function(event) {
-                    var $sf = $(this);
+		// If any child element receives focus within the slider we need to
+		// pause the autoplay.
 
-                    setTimeout(function() {
-                        if( _.options.pauseOnFocus ) {
-                            if ($sf.is(':focus')) {
-                                _.focussed = true;
-                                _.autoPlay();
-                            }
-                        }
-                    }, 0);
-                }
-            ).on(
-                'blur.slick',
-                '*', 
-                function(event) {
-                    var $sf = $(this);
+		_.slider.addEventListener( 'focus', event => {
+			setTimeout( () => {
+				if ( _.options.pauseOnFocus && document.activeElement ) {
+					_.focussed = true;
+					_.autoPlay();
+				}
+			}, 0 );
+		}, true );
 
-                    // When a blur occurs on any elements within the slider we become unfocused
-                    if( _.options.pauseOnFocus ) {
-                        _.focussed = false;
-                        _.autoPlay();
-                    }
-                }
-            );
-    };
+		_.slider.addEventListener( 'blur', () => {
+			if ( _.options.pauseOnFocus ) {
+				_.focussed = false;
+				_.autoPlay();
+			}
+		}, true );
+	};
 
     Slick.prototype.getCurrent = Slick.prototype.slickCurrentSlide = function() {
 
@@ -1331,110 +1310,80 @@
 		_.activateADA();
 	};
 
-    Slick.prototype.initArrowEvents = function() {
+	Slick.prototype.initArrowEvents = function() {
 
-        var _ = this;
+		const _ = this;
 
-        if (_.options.arrows === true && _.slideCount > _.options.slidesToShow) {
-            _.prevArrow
-               .off('click.slick')
-               .on('click.slick', {
-                    message: 'previous'
-               }, _.changeSlide);
-            _.nextArrow
-               .off('click.slick')
-               .on('click.slick', {
-                    message: 'next'
-               }, _.changeSlide);
+		if ( true === _.options.arrows && _.slideCount > _.options.slidesToShow ) {
+			_.prevArrow.removeEventListener( 'click', _.changeSlide );
+			_.prevArrow.addEventListener( 'click', _.changeSlide );
+			_.nextArrow.removeEventListener( 'click', _.changeSlide );
+			_.nextArrow.addEventListener( 'click', _.changeSlide );
 
-            if (_.options.accessibility === true) {
-                _.prevArrow.on('keydown.slick', _.keyHandler);
-                _.nextArrow.on('keydown.slick', _.keyHandler);
-            }
-        }
+			if ( true === _.options.accessibility ) {
+				_.prevArrow.addEventListener( 'keydown', _.keyHandler );
+				_.nextArrow.addEventListener( 'keydown', _.keyHandler );
+			}
+		}
+	};
 
-    };
+	Slick.prototype.initDotEvents = function() {
 
-    Slick.prototype.initDotEvents = function() {
+        const _ = this;
 
-        var _ = this;
+		if ( true === _.options.dots && _.slideCount > _.options.slidesToShow ) {
+			_.dots.querySelectorAll( 'li' ).forEach( li => li.addEventListener( 'click', _.changeSlide ) );
 
-        if (_.options.dots === true && _.slideCount > _.options.slidesToShow) {
-            $('li', _.dots).on('click.slick', {
-                message: 'index'
-            }, _.changeSlide);
+			if ( true === _.options.accessibility ) {
+				_.dots.addEventListener( 'keydown', _.keyHandler );
+			}
+		}
 
-            if (_.options.accessibility === true) {
-                _.dots.on('keydown.slick', _.keyHandler);
-            }
-        }
+		if ( true === _.options.dots && true === _.options.pauseOnDotsHover && _.slideCount > _.options.slidesToShow ) {
+			_.dots.querySelectorAll( 'li' ).forEach( li => {
+				li.addEventListener( 'mouseenter', _.interrupt.bind( _, true ) );
+				li.addEventListener( 'mouseleave', _.interrupt.bind( _, false ) );
+			});
+		}
+	};
 
-        if (_.options.dots === true && _.options.pauseOnDotsHover === true && _.slideCount > _.options.slidesToShow) {
+	Slick.prototype.initSlideEvents = function() {
 
-            $('li', _.dots)
-                .on( 'mouseenter.slick', _.interrupt.bind( _, true ) )
-                .on( 'mouseleave.slick', _.interrupt.bind( _, false ) );
+		const _ = this;
 
-        }
-
-    };
-
-    Slick.prototype.initSlideEvents = function() {
-
-        var _ = this;
-
-        if ( _.options.pauseOnHover ) {
-
-            _.list.on( 'mouseenter.slick', _.interrupt.bind( _, true ) );
-            _.list.on( 'mouseleave.slick', _.interrupt.bind( _, false ) );
-
-        }
-
-    };
+		if ( _.options.pauseOnHover ) {
+			_.list.addEventListener( 'mouseenter', _.interrupt.bind( _, true ) );
+			_.list.addEventListener( 'mouseleave', _.interrupt.bind( _, false ) );
+		}
+	};
 
     Slick.prototype.initializeEvents = function() {
+		_.initArrowEvents();
+		_.initDotEvents();
+		_.initSlideEvents();
 
-        var _ = this;
+		_.list.addEventListener( 'touchstart', _.swipeHandler );
+		_.list.addEventListener( 'mousedown',  _.swipeHandler );
+		_.list.addEventListener( 'touchmove',  _.swipeHandler );
+		_.list.addEventListener( 'mousemove',  _.swipeHandler );
+		_.list.addEventListener( 'touchend',   _.swipeHandler );
+		_.list.addEventListener( 'mouseup',    _.swipeHandler );
+		_.list.addEventListener( 'touchcancel',_.swipeHandler );
+		_.list.addEventListener( 'mouseleave', _.swipeHandler );
+		_.list.addEventListener( 'click',      _.clickHandler );
 
-        _.initArrowEvents();
+		document.addEventListener( _.visibilityChange, _.visibilityHandler );
 
-        _.initDotEvents();
-        _.initSlideEvents();
+		if ( true === _.options.accessibility ) _.list.addEventListener( 'keydown', _.keyHandler );
 
-        _.list.on('touchstart.slick mousedown.slick', {
-            action: 'start'
-        }, _.swipeHandler);
-        _.list.on('touchmove.slick mousemove.slick', {
-            action: 'move'
-        }, _.swipeHandler);
-        _.list.on('touchend.slick mouseup.slick', {
-            action: 'end'
-        }, _.swipeHandler);
-        _.list.on('touchcancel.slick mouseleave.slick', {
-            action: 'end'
-        }, _.swipeHandler);
+		if ( true === _.options.focusOnSelect ) Array.from( _.slideTrack.children ).forEach( el => el.addEventListener( 'click', _.selectHandler ) );
 
-        _.list.on('click.slick', _.clickHandler);
+		window.addEventListener( 'orientationchange', _.orientationChangeHandler );
+		window.addEventListener( 'resize', _.resizeHandler );
 
-        $( document ).on( _.visibilityChange, _.visibility.bind( _ ) );
+		_.slideTrack.querySelectorAll( '[draggable="false"]' ).forEach( el => el.addEventListener( 'dragstart', _.preventDefault ) );
 
-        if (_.options.accessibility === true) {
-            _.list.on('keydown.slick', _.keyHandler);
-        }
-
-        if (_.options.focusOnSelect === true) {
-            $(_.slideTrack).children().on('click.slick', _.selectHandler);
-        }
-
-        $( window ).on( `orientationchange.slick.slick-${_.instanceUid}`, _.orientationChange.bind( _ ) );
-
-        $( window ).on( `resize.slick.slick-${_.instanceUid}`, _.resize.bind( _ ) );
-
-        $('[draggable!=true]', _.slideTrack).on('dragstart', _.preventDefault);
-
-        $(window).on('load.slick.slick-' + _.instanceUid, _.setPosition);
-        $(_.setPosition);
-
+		window.addEventListener( 'load', _.setPosition );
     };
 
     Slick.prototype.initUI = function() {
@@ -1656,58 +1605,44 @@
 
     };
 
-    Slick.prototype.reinit = function() {
+	Slick.prototype.reinit = function() {
 
-        var _ = this;
-
-		// _.slides =
-		// 	_.slideTrack
-		// 		.children(_.options.slide)
-		// 		.addClass('slick-slide');
+		const _ = this;
 
 		_.slides = Array.from( _.slideTrack.querySelectorAll( _.options.slide || '*' ) );
 		_.slides.forEach( el => el.classList.add( 'slick-slide' ) );
 
-        _.slideCount = _.slides.length;
+		_.slideCount = _.slides.length;
 
-        if (_.currentSlide >= _.slideCount && _.currentSlide !== 0) {
-            _.currentSlide = _.currentSlide - _.options.slidesToScroll;
-        }
+		if ( _.currentSlide >= _.slideCount && 0 !== _.currentSlide ) _.currentSlide = _.currentSlide - _.options.slidesToScroll;
 
-        if (_.slideCount <= _.options.slidesToShow) {
-            _.currentSlide = 0;
-        }
+		if ( _.slideCount <= _.options.slidesToShow) _.currentSlide = 0;
 
-        _.registerBreakpoints();
+		_.registerBreakpoints();
+		_.setProps();
+		_.setupInfinite();
+		_.buildArrows();
+		_.updateArrows();
+		_.initArrowEvents();
+		_.buildDots();
+		_.updateDots();
+		_.initDotEvents();
+		_.cleanUpSlideEvents();
+		_.initSlideEvents();
+		_.checkResponsive( false, true );
 
-        _.setProps();
-        _.setupInfinite();
-        _.buildArrows();
-        _.updateArrows();
-        _.initArrowEvents();
-        _.buildDots();
-        _.updateDots();
-        _.initDotEvents();
-        _.cleanUpSlideEvents();
-        _.initSlideEvents();
+        if ( true === _.options.focusOnSelect ) Array.from( _.slideTrack.children ).forEach( el => el.addEventListener( 'click', _.selectHandler ) );
 
-        _.checkResponsive(false, true);
+        _.setSlideClasses( 'number' === typeof _.currentSlide ? _.currentSlide : 0 );
 
-        if (_.options.focusOnSelect === true) {
-            $(_.slideTrack).children().on('click.slick', _.selectHandler);
-        }
+		_.setPosition();
+		_.focusHandler();
 
-        _.setSlideClasses(typeof _.currentSlide === 'number' ? _.currentSlide : 0);
+		_.paused = ! _.options.autoplay;
+		_.autoPlay();
 
-        _.setPosition();
-        _.focusHandler();
-
-        _.paused = !_.options.autoplay;
-        _.autoPlay();
-
-        _.slider.dispatchEvent( new CustomEvent( 'reInit', { detail: [ _ ] } ) );
-
-    };
+		_.slider.dispatchEvent( new CustomEvent( 'reInit', { detail: [ _ ] } ) );
+	};
 
     Slick.prototype.resize = function() {
 
@@ -2542,7 +2477,7 @@
 		_.touchObject.edgeHit = false;
 
 		if (_.options.infinite === false) {
-			
+
 			if ((_.currentSlide === 0 && swipeDirection === 'right') || (_.currentSlide >= _.getDotCount() && swipeDirection === 'left')) {
 				swipeLength = _.touchObject.swipeLength * _.options.edgeFriction;
 				_.touchObject.edgeHit = true;
