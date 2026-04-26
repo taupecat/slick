@@ -45,6 +45,7 @@
 				nextArrow       : '<button class="slick-next" aria-label="Next" type="button">Next</button>',
 				autoplay        : false,
 				autoplaySpeed   : 3000,
+				startPaused     : false,
 				centerMode      : false,
 				centerPadding   : '50px',
 				cssEase         : 'ease',
@@ -1170,7 +1171,7 @@
 
 		if ( true === _.options.accessibility ) _.initADA();
 
-		if ( _.options.autoplay ) {
+		if ( _.options.autoplay && ! _.options.startPaused ) {
 			_.paused = false;
 			_.autoPlay();
 		}
@@ -1388,7 +1389,6 @@
 	};
 
 	Slick.prototype.play = Slick.prototype.slickPlay = function() {
-
 		const _ = this;
 
 		_.paused      = false;
@@ -2467,7 +2467,7 @@
 
 	};
 
-	window.slick = function( selector, opt ) {
+	window.slickInit = function( selector, opt ) {
 		const elements = 'string' === typeof selector ?
 			Array.from( document.querySelectorAll( selector ) ) :
 			( selector instanceof Element ? [ selector ] : Array.from( selector ) );
@@ -2483,6 +2483,8 @@
 			}
 		});
 
-		return 'undefined' !== typeof ret ? ret : elements;
+		if ( 'undefined' !== typeof ret ) return ret;
+		if ( selector instanceof Element ) return selector.slick;
+		return elements;
 	};
 })();
