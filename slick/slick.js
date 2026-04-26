@@ -180,17 +180,15 @@
 		return Slick;
 	}());
 
-    Slick.prototype.activateADA = function() {
-        var _ = this;
+	Slick.prototype.activateADA = function() {
+		const _ = this;
 
-        _.slideTrack.find('.slick-active').attr({
-            'aria-hidden': 'false',
-             'tabindex': '0'
-        }).find('a, input, button, select').attr({
-            'tabindex': '0'
-        });
-
-    };
+		_.slideTrack.querySelectorAll( '.slick-active' ).forEach( el => {
+			el.setAttribute( 'aria-hidden', 'false' );
+			el.setAttribute( 'tabindex', '0' );
+			el.querySelectorAll( 'a, input, button, select' ).forEach( child => child.setAttribute( 'tabindex', '0' ) );
+		});
+	};
 
     Slick.prototype.addSlide = Slick.prototype.slickAdd = function(markup, index, addBefore) {
 
@@ -1245,70 +1243,71 @@
         }
     };
 
-    Slick.prototype.initADA = function() {
-        var _ = this,
-                numDotGroups = Math.ceil(_.slideCount / _.options.slidesToScroll),
-                tabControlIndexes = _.getNavigableIndexes().filter(function(val) {
-                    return (val >= 0) && (val < _.slideCount);
-                });
+	Slick.prototype.initADA = function() {
+		var _ = this,
+				numDotGroups = Math.ceil(_.slideCount / _.options.slidesToScroll),
+				tabControlIndexes = _.getNavigableIndexes().filter(function(val) {
+					return (val >= 0) && (val < _.slideCount);
+				});
 
-        _.slides.add(_.slideTrack.find('.slick-cloned')).attr({
-            'aria-hidden': 'true',
-            'tabindex': '-1'
-        }).find('a, input, button, select').attr({
-            'tabindex': '-1'
-        });
+		const cloned    = Array.from( _.slideTrack.querySelectorAll( '.slick-cloned' ) );
+		const allSlides = [ ..._.slides, ...cloned ];
 
-        if (_.dots !== null) {
-            _.slides.not(_.slideTrack.find('.slick-cloned')).each(function(i) {
-                var slideControlIndex = tabControlIndexes.indexOf(i);
+		allSlides.forEach( el => {
+			el.setAttribute( 'aria-hidden', 'true' );
+			el.setAttribute( 'tabindex', '-1' );
+			el.querySelectorAll( 'a, input, button, select' ).forEach( child => child.setAttribute( 'tabindex', '-1' ) );
+		} );
 
-                $(this).attr({
-                    'role': 'tabpanel',
-                    'id': 'slick-slide' + _.instanceUid + i,
-                    'tabindex': -1
-                });
+		if ( null !== _.dots ) {
+			const clonedSet = new Set( cloned );
 
-                if (slideControlIndex !== -1) {
-                   var ariaButtonControl = 'slick-slide-control' + _.instanceUid + slideControlIndex;
-                   if ($('#' + ariaButtonControl).length) {
-                     $(this).attr({
-                         'aria-describedby': ariaButtonControl
-                     });
-                   }
-                }
-            });
+			_.slides.forEach( ( el, i ) => {
+				if ( clonedSet.has( el ) ) return;
+				const slideControlIndex = tabControlIndexes.indexOf( i );
 
-            _.dots.attr('role', 'tablist').find('li').each(function(i) {
-                var mappedSlideIndex = tabControlIndexes[i];
+				el.setAttribute( 'role', 'tabpanel' );
+				el.setAttribute( 'id', `slick-slide${ _.instanceUid }${ i }` );
+				el.setAttribute( 'tabindex', '-1' );
 
-                $(this).attr({
-                    'role': 'presentation'
-                });
+				if ( -1 !== slideControlIndex ) {
+					const ariaButtonControl = `slick-slide-control${ _.instanceUid }${ slideControlIndex }`;
+					if ( document.getElementById( ariaButtonControl ) ) {
+						el.setAttribute( 'aria-describedby', ariaButtonControl );
+					}
+				}
+			});
 
-                $(this).find('button').first().attr({
-                    'role': 'tab',
-                    'id': 'slick-slide-control' + _.instanceUid + i,
-                    'aria-controls': 'slick-slide' + _.instanceUid + mappedSlideIndex,
-                    'aria-label': (i + 1) + ' / ' + numDotGroups,
-                    'aria-selected': null,
-                    'tabindex': '-1'
-                });
+			_.dots.setAttribute( 'role', 'tablist' );
+			const dotItems = Array.from( _.dots.querySelectorAll( 'li' ) );
+			dotItems.forEach( ( li, i ) => {
+				const mappedSlideIndex = tabControlIndexes[i];
 
-            }).eq(_.currentSlide).find('button').attr({
-                'aria-selected': 'true',
-                'tabindex': '0'
-            }).end();
-        }
+				li.setAttribute( 'role', 'presentation' );
+
+				const btn = li.querySelector( 'button' );
+				if ( btn ) {
+					btn.setAttribute( 'role', 'tab' );
+					btn.setAttribute( 'id', `slick-slide-control${ _.instanceUid }${ i }` );
+					btn.setAttribute( 'aria-controls', `slick-slide${ _.instanceUid }${ mappedSlideIndex }` );
+					btn.setAttribute( 'aria-label', `${ i + 1 } / ${ numDotGroups }` );
+					btn.removeAttribute( 'aria-selected' );
+					btn.setAttribute( 'tabindex', '-1' );
+				}
+			});
+
+			const activeDotIndex = Math.floor( _.currentSlide / _.options.slidesToScroll );
+			const activeBtn      = dotItems[ activeDotIndex ] && dotItems[ activeDotIndex ].querySelector( 'button' );
+
+			if ( activeBtn ) {
+				activeBtn.setAttribute( 'aria-selected', 'true' );
+				activeBtn.setAttribute( 'tabindex', '0' );
+			}
+		}
 
 		for ( let i = _.currentSlide, max = i+_.options.slidesToShow; i < max; i++ ) {
-			if ( _.options.focusOnChange ) {
-				// _.slides.eq(i).attr({'tabindex': '0'});
-				_.slides[i].setAttribute( 'tabindex', '0' );
-			} else {
-				// _.slides.eq(i).removeAttr('tabindex');
-				_.slides[i].removeAttribute( 'tabindex' );
-			}
+			if ( _.options.focusOnChange ) _.slides[i].setAttribute( 'tabindex', '0' );
+			else _.slides[i].removeAttribute( 'tabindex' );
 		}
 
 		_.activateADA();
@@ -2081,29 +2080,22 @@
 
     };
 
-    Slick.prototype.selectHandler = function(event) {
+	Slick.prototype.selectHandler = function( event ) {
 
-        var _ = this;
+		const _             = this;
+		const targetElement = event.target.classList.contains( 'slick-slide' ) ? event.target : event.target.closest( '.slick-slide' );
 
-        var targetElement =
-            $(event.target).is('.slick-slide') ?
-                $(event.target) :
-                $(event.target).parents('.slick-slide');
+		let index = parseInt( targetElement.dataset.slickIndex );
 
-        var index = parseInt(targetElement.attr('data-slick-index'));
+		if ( ! index ) index = 0;
 
-        if (!index) index = 0;
+		if ( _.slideCount <= _.options.slidesToShow ) {
+			_.slideHandler( index, false, true );
+			return;
+		}
 
-        if (_.slideCount <= _.options.slidesToShow) {
-
-            _.slideHandler(index, false, true);
-            return;
-
-        }
-
-        _.slideHandler(index);
-
-    };
+		_.slideHandler( index );
+	};
 
     Slick.prototype.slideHandler = function(index, sync, dontAnimate) {
 
