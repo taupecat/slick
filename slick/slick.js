@@ -792,17 +792,17 @@
 		_.list.removeEventListener( 'mouseleave', _.interrupt.bind( _, false ) );
     };
 
-    Slick.prototype.cleanUpRows = function() {
+	Slick.prototype.cleanUpRows = function() {
 
-        var _ = this, originalSlides;
+		const _ = this;
 
-        if(_.options.rows > 0) {
-            originalSlides = _.slides.children().children();
-            originalSlides.removeAttr('style');
-            _.slider.empty().append(originalSlides);
-        }
-
-    };
+		if ( _.options.rows > 0 ) {
+			const originalSlides = _.slides.flatMap( slide => Array.from( slide.children ).flatMap( row => Array.from( row.children ) ) );
+			originalSlides.forEach( el => el.removeAttribute( 'style' ) );
+			while ( _.slider.firstChild ) _.slider.removeChild( _.slider.firstChild );
+			originalSlides.forEach( el => _.slider.appendChild( el ) );
+		}
+	};
 
     Slick.prototype.clickHandler = function(event) {
 
@@ -946,25 +946,24 @@
 		}
 	};
 
-    Slick.prototype.filterSlides = Slick.prototype.slickFilter = function(filter) {
+	Slick.prototype.filterSlides = Slick.prototype.slickFilter = function( filter ) {
 
-        var _ = this;
+		const _ = this;
 
-        if (filter !== null) {
+		if ( null !== filter ) {
+			_.slidesCache = _.slides;
+			_.unload();
 
-            _.slidesCache = _.slides;
+			const slideSelector = this.options.slide || '*';
 
-            _.unload();
+			_.slideTrack.querySelectorAll( slideSelector ).forEach( el => el.remove() );
 
-            _.slideTrack.children(this.options.slide).detach();
+			const filteredSlides = 'string' === typeof filter ? _.slidesCache.filter( el => el.matches( filter ) ) : _.slidesCache.filter( filter );
+			filteredSlides.forEach( el => _.slideTrack.appendChild( el ) );
 
-            _.slidesCache.filter(filter).appendTo(_.slideTrack);
-
-            _.reinit();
-
-        }
-
-    };
+			_.reinit();
+		}
+	};
 
 	Slick.prototype.focusHandler = function() {
 
@@ -1624,41 +1623,33 @@
         }
     };
 
-    Slick.prototype.removeSlide = Slick.prototype.slickRemove = function(index, removeBefore, removeAll) {
+	Slick.prototype.removeSlide = Slick.prototype.slickRemove = function( index, removeBefore, removeAll ) {
 
-        var _ = this;
+		const _ = this;
 
-        if (typeof(index) === 'boolean') {
-            removeBefore = index;
-            index = removeBefore === true ? 0 : _.slideCount - 1;
-        } else {
-            index = removeBefore === true ? --index : index;
-        }
+		if ( 'boolean' === typeof(index) ) {
+			removeBefore = index;
+			index        = true === removeBefore ? 0 : _.slideCount - 1;
+		} else {
+			index = true === removeBefore ? --index : index;
+		}
 
-        if (_.slideCount < 1 || index < 0 || index > _.slideCount - 1) {
-            return false;
-        }
+		if ( 1 > _.slideCount || 0 > index || index > _.slideCount - 1 ) return false;
 
-        _.unload();
+		_.unload();
 
-        if (removeAll === true) {
-            _.slideTrack.children().remove();
-        } else {
-            _.slideTrack.children(this.options.slide).eq(index).remove();
-        }
+		if ( true === removeAll ) Array.from( _.slideTrack.children ).forEach( el => el.remove() );
+		else _.slideTrack.querySelectorAll( this.options.slide || '*' )[ index ].remove();
 
-        // _.slides = _.slideTrack.children(this.options.slide);
 		_.slides = Array.from( _.slideTrack.querySelectorAll( this.options.slide || '*' ) );
 
-        _.slideTrack.children(this.options.slide).detach();
+		const slideSelector = this.options.slide || '*';
 
-        _.slideTrack.append(_.slides);
-
-        _.slidesCache = _.slides;
-
-        _.reinit();
-
-    };
+		_.slideTrack.querySelectorAll( slideSelector ).forEach( el => el.remove() );
+		_.slides.forEach( el => _.slideTrack.appendChild( el ) );
+		_.slidesCache = _.slides;
+		_.reinit();
+	};
 
 	Slick.prototype.setCSS = function( position ) {
 
@@ -2489,23 +2480,21 @@
 
     };
 
-    Slick.prototype.unfilterSlides = Slick.prototype.slickUnfilter = function() {
+	Slick.prototype.unfilterSlides = Slick.prototype.slickUnfilter = function() {
 
-        var _ = this;
+		const _ = this;
 
-        if (_.slidesCache !== null) {
+		if ( null !== _.slidesCache ) {
 
-            _.unload();
+			_.unload();
 
-            _.slideTrack.children(this.options.slide).detach();
+			const slideSelector = this.options.slide || '*';
 
-            _.slidesCache.appendTo(_.slideTrack);
-
-            _.reinit();
-
-        }
-
-    };
+			_.slideTrack.querySelectorAll( slideSelector ).forEach( el => el.remove() );
+			_.slidesCache.forEach( el => _.slideTrack.appendChild( el ) );
+			_.reinit();
+		}
+	};
 
 	Slick.prototype.unload = function() {
 
