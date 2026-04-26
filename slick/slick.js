@@ -141,8 +141,7 @@
 			_.transformType      = null;
 			_.transitionType     = null;
 			_.visibilityChange   = 'visibilitychange';
-			_.windowWidth        = 0;
-			_.windowDelay        = null;
+			_.resizeObserver     = null;
 
 			dataSettings = element.dataset.slick ? JSON.parse( element.dataset.slick ) : {};
 
@@ -161,7 +160,6 @@
 			_.instanceUid      = instanceUid++;
 
 			_.orientationChangeHandler = _.orientationChange.bind( _ );
-			_.resizeHandler            = _.resize.bind( _ );
 			_.visibilityHandler        = _.visibility.bind( _ );
 
 			_.focusInHandler  = null;
@@ -730,7 +728,7 @@
 		if ( true === _.options.focusOnSelect ) Array.from( _.slideTrack.children ).forEach( el => el.removeEventListener( 'click', _.selectHandler ) );
 
 		window.removeEventListener( 'orientationchange', _.orientationChangeHandler );
-		window.removeEventListener( 'resize', _.resizeHandler );
+		_.resizeObserver.disconnect();
 		window.removeEventListener( 'load', _.setPosition );
 	};
 
@@ -1317,7 +1315,12 @@
 		if ( true === _.options.focusOnSelect ) Array.from( _.slideTrack.children ).forEach( el => el.addEventListener( 'click', _.selectHandler ) );
 
 		window.addEventListener( 'orientationchange', _.orientationChangeHandler );
-		window.addEventListener( 'resize', _.resizeHandler );
+
+		_.resizeObserver = new ResizeObserver( () => {
+			_.checkResponsive();
+			if ( ! _.unslicked ) _.setPosition();
+		});
+		_.resizeObserver.observe( _.slider );
 
 		_.slideTrack.querySelectorAll( '[draggable="false"]' ).forEach( el => el.addEventListener( 'dragstart', _.preventDefault ) );
 
@@ -1538,20 +1541,6 @@
 		_.autoPlay();
 
 		_.slider.dispatchEvent( new CustomEvent( 'reInit', { detail: [ _ ] }) );
-	};
-
-	Slick.prototype.resize = function() {
-
-		const _ = this;
-
-		if ( window.innerWidth !== _.windowWidth ) {
-			clearTimeout( _.windowDelay );
-			_.windowDelay = window.setTimeout( () => {
-				_.windowWidth = window.innerWidth;
-				_.checkResponsive();
-				if ( !_.unslicked ) _.setPosition();
-			}, 50 );
-		}
 	};
 
 	Slick.prototype.removeSlide = Slick.prototype.slickRemove = function( index, removeBefore, removeAll ) {
