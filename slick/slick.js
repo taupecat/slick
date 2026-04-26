@@ -343,21 +343,14 @@
 
 	Slick.prototype.applyTransition = function( slide ) {
 
-		const _ = this,
-			transition = {};
+		const _          = this,
+		      transition = {};
 
-		if ( false === _.options.fade ) {
-			transition[_.transitionType] = _.transformType + ' ' + _.options.speed + 'ms ' + _.options.cssEase;
-		} else {
-			transition[_.transitionType] = 'opacity ' + _.options.speed + 'ms ' + _.options.cssEase;
-		}
+		if ( false === _.options.fade ) transition[_.transitionType] = _.transformType + ' ' + _.options.speed + 'ms ' + _.options.cssEase;
+		else transition[_.transitionType] = 'opacity ' + _.options.speed + 'ms ' + _.options.cssEase;
 
-		if ( false === _.options.fade ) {
-			_.slideTrack.css( transition );
-		} else {
-			// _.slides.eq( slide ).css( transition );
-			Object.assign( _.slides[slide].style, transition );
-		}
+		if ( false === _.options.fade ) Object.assign( _.slideTrack.style, transition );
+		else Object.assign( _.slides[slide].style, transition );
 	};
 
     Slick.prototype.autoPlay = function() {
@@ -480,26 +473,13 @@
 
     };
 
-    Slick.prototype.buildOut = function() {
+	Slick.prototype.buildOut = function() {
 
-        var _ = this;
-
-		// _.slides =
-		// 	_.slider
-		// 		.children( _.options.slide + ':not(.slick-cloned)')
-		// 		.addClass('slick-slide');
-
-		// _.slideCount = _.slides.length;
-
-		// _.slides.each(function(index, element) {
-		// 	$(element)
-		// 		.attr('data-slick-index', index)
-		// 		.data('originalStyling', $(element).attr('style') || '');
-		// });
+		const _ = this;
 
 		const selector = ( _.options.slide ? _.options.slide + ':not(.slick-cloned)' : ':not(.slick-cloned)' );
 		_.slides = Array.from( _.slider.querySelectorAll( selector ) );
-		_.slides.forEach( el => el.classList.add('slick-slide') );
+		_.slides.forEach( el => el.classList.add( 'slick-slide' ) );
 
 		_.slideCount = _.slides.length;
 
@@ -508,36 +488,36 @@
 			el.dataset.originalStyling = el.getAttribute( 'style' ) || '';
 		});
 
-        _.slider.classList.add( 'slick-slider' );
+		_.slider.classList.add( 'slick-slider' );
 
-        _.slideTrack = ( 0 === _.slideCount ) ?
-            $( '<div class="slick-track"></div>' ).appendTo( _.slider ) :
-            _.slides.wrapAll( '<div class="slick-track"></div>' ).parent();
+		const track = document.createElement( 'div' );
+		track.className = 'slick-track';
+		if ( 0 === _.slideCount ) {
+			_.slider.appendChild( track );
+		} else {
+			_.slides[0].parentNode.insertBefore( track, _.slides[0] );
+			_.slides.forEach( el => track.appendChild( el ) );
+		}
+		_.slideTrack = track;
 
-        _.list = _.slideTrack.wrap(
-            '<div class="slick-list"></div>').parent();
-        _.slideTrack.css('opacity', 0);
+		const list = document.createElement( 'div' );
+		list.className = 'slick-list';
+		_.slideTrack.parentNode.insertBefore( list, _.slideTrack );
+		list.appendChild( _.slideTrack );
+		_.list = list;
 
-        if (_.options.centerMode === true || _.options.swipeToSlide === true) {
-            _.options.slidesToScroll = 1;
-        }
+		_.slideTrack.style.opacity = 0;
 
-        _.setupInfinite();
+		if ( true === _.options.centerMode || true === _.options.swipeToSlide ) _.options.slidesToScroll = 1;
 
-        _.buildArrows();
+		_.setupInfinite();
+		_.buildArrows();
+		_.buildDots();
+		_.updateDots();
+		_.setSlideClasses( 'number' === typeof _.currentSlide ? _.currentSlide : 0 );
 
-        _.buildDots();
-
-        _.updateDots();
-
-
-        _.setSlideClasses(typeof _.currentSlide === 'number' ? _.currentSlide : 0);
-
-        if (_.options.draggable === true) {
-            _.list.addClass('draggable');
-        }
-
-    };
+		if ( true === _.options.draggable ) _.list.classList.add( 'draggable' );
+	};
 
     Slick.prototype.buildRows = function() {
 
@@ -904,17 +884,13 @@
 
 	Slick.prototype.disableTransition = function( slide ) {
 
-		const _ = this, transition = {};
+		const _          = this,
+		      transition = {};
 
 		transition[_.transitionType] = '';
 
-		if ( false === _.options.fade ) {
-			_.slideTrack.css( transition );
-		} else {
-			// _.slides.eq(slide).css(transition);
-			Object.assign( _.slides[slide].style, transition );
-		}
-
+		if ( false === _.options.fade ) Object.assign( _.slideTrack.style, transition );
+		else Object.assign( _.slides[slide].style, transition );
 	};
 
 	Slick.prototype.fadeSlide = function( slideIndex, callback ) {
@@ -1076,97 +1052,96 @@
 
     };
 
-    Slick.prototype.getLeft = function(slideIndex) {
+	Slick.prototype.getLeft = function( slideIndex ) {
 
-        var _ = this,
-            targetLeft,
-            verticalHeight,
-            verticalOffset = 0,
-            targetSlide,
-            coef;
+		var _ = this,
+			targetLeft,
+			verticalHeight,
+			verticalOffset = 0,
+			targetSlide,
+			coef;
 
-        _.slideOffset = 0;
-        // verticalHeight = _.slides.first().outerHeight(true);
-        verticalHeight = _.slides[0].offsetHeight;
+		_.slideOffset = 0;
+		verticalHeight = _.slides[0].offsetHeight;
 
-        if (_.options.infinite === true) {
-            if (_.slideCount > _.options.slidesToShow) {
-                _.slideOffset = (_.slideWidth * _.options.slidesToShow) * -1;
-                coef = -1;
+		if (_.options.infinite === true) {
+			if (_.slideCount > _.options.slidesToShow) {
+				_.slideOffset = (_.slideWidth * _.options.slidesToShow) * -1;
+				coef = -1;
 
-                if (_.options.vertical === true && _.options.centerMode === true) {
-                    if (_.options.slidesToShow === 2) {
-                        coef = -1.5;
-                    } else if (_.options.slidesToShow === 1) {
-                        coef = -2;
-                    }
-                }
-                verticalOffset = (verticalHeight * _.options.slidesToShow) * coef;
-            }
-            if (_.slideCount % _.options.slidesToScroll !== 0) {
-                if (slideIndex + _.options.slidesToScroll > _.slideCount && _.slideCount > _.options.slidesToShow) {
-                    if (slideIndex > _.slideCount) {
-                        _.slideOffset = ((_.options.slidesToShow - (slideIndex - _.slideCount)) * _.slideWidth) * -1;
-                        verticalOffset = ((_.options.slidesToShow - (slideIndex - _.slideCount)) * verticalHeight) * -1;
-                    } else {
-                        _.slideOffset = ((_.slideCount % _.options.slidesToScroll) * _.slideWidth) * -1;
-                        verticalOffset = ((_.slideCount % _.options.slidesToScroll) * verticalHeight) * -1;
-                    }
-                }
-            }
-        } else {
-            if (slideIndex + _.options.slidesToShow > _.slideCount) {
-                _.slideOffset = ((slideIndex + _.options.slidesToShow) - _.slideCount) * _.slideWidth;
-                verticalOffset = ((slideIndex + _.options.slidesToShow) - _.slideCount) * verticalHeight;
-            }
-        }
+				if (_.options.vertical === true && _.options.centerMode === true) {
+					if (_.options.slidesToShow === 2) {
+						coef = -1.5;
+					} else if (_.options.slidesToShow === 1) {
+						coef = -2;
+					}
+				}
+				verticalOffset = (verticalHeight * _.options.slidesToShow) * coef;
+			}
+			if (_.slideCount % _.options.slidesToScroll !== 0) {
+				if (slideIndex + _.options.slidesToScroll > _.slideCount && _.slideCount > _.options.slidesToShow) {
+					if (slideIndex > _.slideCount) {
+						_.slideOffset = ((_.options.slidesToShow - (slideIndex - _.slideCount)) * _.slideWidth) * -1;
+						verticalOffset = ((_.options.slidesToShow - (slideIndex - _.slideCount)) * verticalHeight) * -1;
+					} else {
+						_.slideOffset = ((_.slideCount % _.options.slidesToScroll) * _.slideWidth) * -1;
+						verticalOffset = ((_.slideCount % _.options.slidesToScroll) * verticalHeight) * -1;
+					}
+				}
+			}
+		} else {
+			if (slideIndex + _.options.slidesToShow > _.slideCount) {
+				_.slideOffset = ((slideIndex + _.options.slidesToShow) - _.slideCount) * _.slideWidth;
+				verticalOffset = ((slideIndex + _.options.slidesToShow) - _.slideCount) * verticalHeight;
+			}
+		}
 
-        if (_.slideCount <= _.options.slidesToShow) {
-            _.slideOffset = 0;
-            verticalOffset = 0;
-        }
+		if (_.slideCount <= _.options.slidesToShow) {
+			_.slideOffset = 0;
+			verticalOffset = 0;
+		}
 
-        if (_.options.centerMode === true && _.slideCount <= _.options.slidesToShow) {
-            _.slideOffset = ((_.slideWidth * Math.floor(_.options.slidesToShow)) / 2) - ((_.slideWidth * _.slideCount) / 2);
-        } else if (_.options.centerMode === true && _.options.infinite === true) {
-            _.slideOffset += _.slideWidth * Math.floor(_.options.slidesToShow / 2) - _.slideWidth;
-        } else if (_.options.centerMode === true) {
-            _.slideOffset = 0;
-            _.slideOffset += _.slideWidth * Math.floor(_.options.slidesToShow / 2);
-        }
+		if (_.options.centerMode === true && _.slideCount <= _.options.slidesToShow) {
+			_.slideOffset = ((_.slideWidth * Math.floor(_.options.slidesToShow)) / 2) - ((_.slideWidth * _.slideCount) / 2);
+		} else if (_.options.centerMode === true && _.options.infinite === true) {
+			_.slideOffset += _.slideWidth * Math.floor(_.options.slidesToShow / 2) - _.slideWidth;
+		} else if (_.options.centerMode === true) {
+			_.slideOffset = 0;
+			_.slideOffset += _.slideWidth * Math.floor(_.options.slidesToShow / 2);
+		}
 
-        if (_.options.vertical === false) {
-            targetLeft = ((slideIndex * _.slideWidth) * -1) + _.slideOffset;
-        } else {
-            targetLeft = ((slideIndex * verticalHeight) * -1) + verticalOffset;
-        }
+		if (_.options.vertical === false) {
+			targetLeft = ((slideIndex * _.slideWidth) * -1) + _.slideOffset;
+		} else {
+			targetLeft = ((slideIndex * verticalHeight) * -1) + verticalOffset;
+		}
 
-        if (_.options.variableWidth === true) {
+		if (_.options.variableWidth === true) {
 
-            if (_.slideCount <= _.options.slidesToShow || _.options.infinite === false) {
-                targetSlide = _.slideTrack.children('.slick-slide').eq(slideIndex);
-            } else {
-                targetSlide = _.slideTrack.children('.slick-slide').eq(slideIndex + _.options.slidesToShow);
-            }
+			if (_.slideCount <= _.options.slidesToShow || _.options.infinite === false) {
+				targetSlide = _.slideTrack.children('.slick-slide').eq(slideIndex);
+			} else {
+				targetSlide = _.slideTrack.children('.slick-slide').eq(slideIndex + _.options.slidesToShow);
+			}
 
-            targetLeft = targetSlide[0] ? targetSlide[0].offsetLeft * -1 : 0;
+			targetLeft = targetSlide[0] ? targetSlide[0].offsetLeft * -1 : 0;
 
-            if (_.options.centerMode === true) {
-                if (_.slideCount <= _.options.slidesToShow || _.options.infinite === false) {
-                    targetSlide = _.slideTrack.children('.slick-slide').eq(slideIndex);
-                } else {
-                    targetSlide = _.slideTrack.children('.slick-slide').eq(slideIndex + _.options.slidesToShow + 1);
-                }
+			if (_.options.centerMode === true) {
+				if (_.slideCount <= _.options.slidesToShow || _.options.infinite === false) {
+					targetSlide = _.slideTrack.children('.slick-slide').eq(slideIndex);
+				} else {
+					targetSlide = _.slideTrack.children('.slick-slide').eq(slideIndex + _.options.slidesToShow + 1);
+				}
 
-                targetLeft = targetSlide[0] ? targetSlide[0].offsetLeft * -1 : 0;
+				targetLeft = targetSlide[0] ? targetSlide[0].offsetLeft * -1 : 0;
 
-                targetLeft += (_.list.width() - targetSlide.outerWidth()) / 2;
-            }
-        }
+				targetLeft += ( _.list.offsetWidth - targetSlide.offsetWidth ) / 2;
+			}
+		}
 
-        return targetLeft;
+		return targetLeft;
 
-    };
+	};
 
     Slick.prototype.getOption = Slick.prototype.slickGetOption = function(option) {
 
@@ -1213,23 +1188,23 @@
         var _ = this,
             slidesTraversed, swipedSlide, swipeTarget, centerOffset;
 
-        centerOffset = _.options.centerMode === true ? Math.floor(_.list.width() / 2) : 0;
-        swipeTarget = (_.swipeLeft * -1) + centerOffset;
+        centerOffset = true === _.options.centerMode ? Math.floor( _.list.offsetWidth / 2 ) : 0;
+        swipeTarget  = ( _.swipeLeft * -1 ) + centerOffset;
 
-        if (_.options.swipeToSlide === true) {
+        if ( true === _.options.swipeToSlide ) {
 
-            _.slideTrack.find('.slick-slide').each(function(index, slide) {
+            _.slideTrack.find( '.slick-slide' ).each( function( index, slide ) {
 
                 var slideOuterWidth, slideOffset, slideRightBoundary;
+
                 slideOuterWidth = $(slide).outerWidth();
-                slideOffset = slide.offsetLeft;
-                if (_.options.centerMode !== true) {
-                    slideOffset += (slideOuterWidth / 2);
-                }
+                slideOffset     = slide.offsetLeft;
 
-                slideRightBoundary = slideOffset + (slideOuterWidth);
+                if ( true !== _.options.centerMode ) slideOffset += ( slideOuterWidth / 2 );
 
-                if (swipeTarget < slideRightBoundary) {
+                slideRightBoundary = slideOffset + ( slideOuterWidth );
+
+                if ( swipeTarget < slideRightBoundary ) {
                     swipedSlide = slide;
                     return false;
                 }
@@ -1242,7 +1217,6 @@
         } else {
             return _.options.slidesToScroll;
         }
-
     };
 
     Slick.prototype.goTo = Slick.prototype.slickGoTo = function(slide, dontAnimate) {
@@ -1504,21 +1478,15 @@
 
     };
 
-    Slick.prototype.loadSlider = function() {
+	Slick.prototype.loadSlider = function() {
 
-        var _ = this;
+		const _ = this;
 
-        _.setPosition();
-
-        _.slideTrack.css({
-            opacity: '1'
-        });
-
-        _.slider.classList.remove('slick-loading');
-
-        _.initUI();
-
-    };
+		_.setPosition();
+		_.slideTrack.style.opacity = '1';
+		_.slider.classList.remove('slick-loading');
+		_.initUI();
+	};
 
     Slick.prototype.next = Slick.prototype.slickNext = function() {
 
@@ -1791,89 +1759,68 @@
 
     };
 
-    Slick.prototype.setCSS = function(position) {
+	Slick.prototype.setCSS = function( position ) {
 
-        var _ = this,
-            positionProps = {},
-            x, y;
+		const _ = this;
 
-        x = _.positionProp == 'left' ? Math.ceil(position) + 'px' : '0';
-        y = _.positionProp == 'top' ? Math.ceil(position) + 'px' : '0';
+		let positionProps = {};
+		let x, y;
 
-        positionProps[_.positionProp] = position;
+		x = _.positionProp == 'left' ? `${Math.ceil(position)}px` : '0';
+		y = _.positionProp == 'top' ? `${Math.ceil(position)}px` : '0';
 
-        if (_.transformsEnabled === false) {
-            _.slideTrack.css(positionProps);
-        } else {
-            positionProps = {};
-            if (_.cssTransitions === false) {
-                positionProps[_.animType] = 'translate(' + x + ', ' + y + ')';
-                _.slideTrack.css(positionProps);
-            } else {
-                positionProps[_.animType] = 'translate3d(' + x + ', ' + y + ', 0)';
-                _.slideTrack.css(positionProps);
-            }
-        }
+		positionProps[_.positionProp] = position;
 
-    };
+		if ( false === _.transformsEnabled ) {
+			Object.assign( _.slideTrack.style, positionProps );
+		} else {
+			positionProps = {};
+			if ( false === _.cssTransitions ) {
+				positionProps[_.animType] = `translate(${x}, ${y})`;
+				Object.assign( _.slideTrack.style, positionProps );
+			} else {
+				positionProps[_.animType] = `translate3d(${x}, ${y}, 0)`;
+				Object.assign( _.slideTrack.style, positionProps );
+			}
+		}
+	};
 
-    Slick.prototype.setDimensions = function() {
+	Slick.prototype.setDimensions = function() {
 
-        var _ = this;
+		const _ = this;
 
-        if (_.options.vertical === false) {
-            if (_.options.centerMode === true) {
-                _.list.css({
-                    padding: ('0px ' + _.options.centerPadding)
-                });
-            }
-        } else {
-            // _.list.height(_.slides.first().outerHeight(true) * _.options.slidesToShow);
-            _.list.css( 'height', `${(_.slides[0].offsetHeight * _.options.slidesToShow )}px` );
-            if (_.options.centerMode === true) {
-                _.list.css({
-                    padding: (_.options.centerPadding + ' 0px')
-                });
-            }
-        }
+		if ( false === _.options.vertical ) {
+			if ( true === _.options.centerMode ) _.list.style.padding = `0px ${_.options.centerPadding}`;
+		} else {
+			_.list.style.height = `${(_.slides[0].offsetHeight * _.options.slidesToShow )}px`;
 
-        _.listWidth = _.list.width();
-        _.listHeight = _.list.height();
+			if ( true === _.options.centerMode ) _.list.style.padding = `${_.options.centerPadding} 0px`;
+		}
 
+		_.listWidth  = _.list.offsetWidth;
+		_.listHeight = _.list.offsetHeight;
 
-        if (_.options.vertical === false && _.options.variableWidth === false) {
-            _.slideWidth = Math.ceil(_.listWidth / _.options.slidesToShow);
-            _.slideTrack.width(Math.ceil((_.slideWidth * _.slideTrack.children('.slick-slide').length)));
+		if ( false === _.options.vertical && false === _.options.variableWidth ) {
+			_.slideWidth = Math.ceil( _.listWidth / _.options.slidesToShow );
+			_.slideTrack.style.width = `${Math.ceil( _.slideWidth * _.slideTrack.querySelectorAll( '.slick-slide' ).length )}px`;
 
-        } else if (_.options.variableWidth === true) {
-            _.slideTrack.width(5000 * _.slideCount);
-        } else {
-            _.slideWidth = Math.ceil(_.listWidth);
-            // _.slideTrack.height(Math.ceil((_.slides.first().outerHeight(true) * _.slideTrack.children('.slick-slide').length)));
-            _.slideTrack.height( Math.ceil( _.slides[0].offsetHeight * _.slideTrack.children( '.slick-slide' ).length ) );
-        }
+		} else if ( true === _.options.variableWidth ) {
+			_.slideTrack.style.width = `${5000 * _.slideCount}px`;
+		} else {
+			_.slideWidth = Math.ceil(_.listWidth);
+			_.slideTrack.style.height = `${Math.ceil( _.slides[0].offsetHeight * _.slideTrack.querySelectorAll( '.slick-slide' ).length )}px`;
+		}
 
-        // var offset = _.slides.first().outerWidth(true) - _.slides.first().width();
 		const slideStyle = window.getComputedStyle( _.slides[0] );
 		const offset     = parseInt( slideStyle.marginLeft ) + parseInt( slideStyle.marginRight );
-        if (_.options.variableWidth === false) _.slideTrack.children('.slick-slide').width(_.slideWidth - offset);
 
-    };
+		if ( false === _.options.variableWidth ) _.slideTrack.querySelectorAll( '.slick-slide' ).forEach( el => el.style.width = `${_.slideWidth - offset}px` );
+	};
 
 	Slick.prototype.setFade = function() {
 
 		const _ = this, targetLeft;
 
-		// _.slides.each(function(index, element) {
-		// 	targetLeft = (_.slideWidth * index) * -1;
-		// 	$(element).css({
-		// 		position: 'relative',
-		// 		left: targetLeft,
-		// 		top: '0',
-		// 		zIndex: _.options.zIndex - 2,
-		// 		opacity: '0'
-		// 	});
-		// });
 		_.slides.forEach( ( el, index ) => {
 			targetLeft = ( _.slideWidth * index ) * -1;
 			Object.assign( el.style, {
@@ -1885,10 +1832,6 @@
 			});
 		});
 
-		// _.slides.eq(_.currentSlide).css({
-		// 	zIndex: _.options.zIndex - 1,
-		// 	opacity: '1'
-		// });
 		_.slides[_.currentSlide].style.zIndex = _.options.zIndex - 1;
 		_.slides[_.currentSlide].style.opacity = '1';
 	};
@@ -1899,7 +1842,7 @@
 
 		if ( 1 === _.options.slidesToShow && true === _.options.adaptiveHeight && false === _.options.vertical ) {
 			const targetHeight = _.slides[_.currentSlide].offsetHeight;
-			_.list.css( 'height', `${targetHeight}px` );
+			_.list.style.height = `${targetHeight}px`;
 		}
 	};
 
@@ -2051,7 +1994,6 @@
         }
         _.transformsEnabled = _.options.useTransform && (_.animType !== null && _.animType !== false);
     };
-
 
 	Slick.prototype.setSlideClasses = function( index ) {
 
@@ -2550,83 +2492,85 @@
 
     };
 
-    Slick.prototype.swipeMove = function(event) {
+	Slick.prototype.swipeMove = function(event) {
 
-        var _ = this,
-            edgeWasHit = false,
-            curLeft, swipeDirection, swipeLength, positionOffset, touches, verticalSwipeLength;
+		var _ = this,
+			edgeWasHit = false,
+			curLeft, swipeDirection, swipeLength, positionOffset, touches, verticalSwipeLength;
 
-        touches = event.originalEvent !== undefined ? event.originalEvent.touches : null;
+		touches = event.originalEvent !== undefined ? event.originalEvent.touches : null;
 
-        if (!_.dragging || _.scrolling || touches && touches.length !== 1) {
-            return false;
-        }
+		if (!_.dragging || _.scrolling || touches && touches.length !== 1) {
+			return false;
+		}
 
-        curLeft = _.getLeft(_.currentSlide);
+		curLeft = _.getLeft(_.currentSlide);
 
-        _.touchObject.curX = touches !== undefined ? touches[0].pageX : event.clientX;
-        _.touchObject.curY = touches !== undefined ? touches[0].pageY : event.clientY;
+		_.touchObject.curX = touches !== undefined ? touches[0].pageX : event.clientX;
+		_.touchObject.curY = touches !== undefined ? touches[0].pageY : event.clientY;
 
-        _.touchObject.swipeLength = Math.round(Math.sqrt(
-            Math.pow(_.touchObject.curX - _.touchObject.startX, 2)));
+		_.touchObject.swipeLength = Math.round(Math.sqrt(
+			Math.pow(_.touchObject.curX - _.touchObject.startX, 2)));
 
-        verticalSwipeLength = Math.round(Math.sqrt(
-            Math.pow(_.touchObject.curY - _.touchObject.startY, 2)));
+		verticalSwipeLength = Math.round(Math.sqrt(
+			Math.pow(_.touchObject.curY - _.touchObject.startY, 2)));
 
-        if (!_.options.verticalSwiping && !_.swiping && verticalSwipeLength > 4) {
-            _.scrolling = true;
-            return false;
-        }
+		if (!_.options.verticalSwiping && !_.swiping && verticalSwipeLength > 4) {
+			_.scrolling = true;
+			return false;
+		}
 
-        if (_.options.verticalSwiping === true) {
-            _.touchObject.swipeLength = verticalSwipeLength;
-        }
+		if (_.options.verticalSwiping === true) {
+			_.touchObject.swipeLength = verticalSwipeLength;
+		}
 
-        swipeDirection = _.swipeDirection();
+		swipeDirection = _.swipeDirection();
 
-        if (event.originalEvent !== undefined && _.touchObject.swipeLength > 4) {
-            _.swiping = true;
-            event.preventDefault();
-        }
+		if (event.originalEvent !== undefined && _.touchObject.swipeLength > 4) {
+			_.swiping = true;
+			event.preventDefault();
+		}
 
-        positionOffset = _.touchObject.curX > _.touchObject.startX ? 1 : -1;
-        if (_.options.verticalSwiping === true) {
-            positionOffset = _.touchObject.curY > _.touchObject.startY ? 1 : -1;
-        }
+		positionOffset = _.touchObject.curX > _.touchObject.startX ? 1 : -1;
+		if (_.options.verticalSwiping === true) {
+			positionOffset = _.touchObject.curY > _.touchObject.startY ? 1 : -1;
+		}
 
 
-        swipeLength = _.touchObject.swipeLength;
+		swipeLength = _.touchObject.swipeLength;
 
-        _.touchObject.edgeHit = false;
+		_.touchObject.edgeHit = false;
 
-        if (_.options.infinite === false) {
-            if ((_.currentSlide === 0 && swipeDirection === 'right') || (_.currentSlide >= _.getDotCount() && swipeDirection === 'left')) {
-                swipeLength = _.touchObject.swipeLength * _.options.edgeFriction;
-                _.touchObject.edgeHit = true;
-            }
-        }
+		if (_.options.infinite === false) {
+			
+			if ((_.currentSlide === 0 && swipeDirection === 'right') || (_.currentSlide >= _.getDotCount() && swipeDirection === 'left')) {
+				swipeLength = _.touchObject.swipeLength * _.options.edgeFriction;
+				_.touchObject.edgeHit = true;
+			}
+		}
 
-        if (_.options.vertical === false) {
-            _.swipeLeft = curLeft + swipeLength * positionOffset;
-        } else {
-            _.swipeLeft = curLeft + (swipeLength * (_.list.height() / _.listWidth)) * positionOffset;
-        }
-        if (_.options.verticalSwiping === true) {
-            _.swipeLeft = curLeft + swipeLength * positionOffset;
-        }
+		if (_.options.vertical === false) {
+			_.swipeLeft = curLeft + swipeLength * positionOffset;
+		} else {
+			_.swipeLeft = curLeft + ( swipeLength * ( _.list.offsetHeight / _.listWidth ) ) * positionOffset;
+		}
 
-        if (_.options.fade === true || _.options.touchMove === false) {
-            return false;
-        }
+		if (_.options.verticalSwiping === true) {
+			_.swipeLeft = curLeft + swipeLength * positionOffset;
+		}
 
-        if (_.animating === true) {
-            _.swipeLeft = null;
-            return false;
-        }
+		if (_.options.fade === true || _.options.touchMove === false) {
+			return false;
+		}
 
-        _.setCSS(_.swipeLeft);
+		if (_.animating === true) {
+			_.swipeLeft = null;
+			return false;
+		}
 
-    };
+		_.setCSS(_.swipeLeft);
+
+	};
 
     Slick.prototype.swipeStart = function(event) {
 
