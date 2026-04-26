@@ -142,7 +142,7 @@
 			_.transitionType     = null;
 			_.visibilityChange   = 'visibilitychange';
 			_.windowWidth        = 0;
-			_.windowTimer        = null;
+			_.windowDelay        = null;
 
 			dataSettings = element.dataset.slick ? JSON.parse( element.dataset.slick ) : {};
 
@@ -534,7 +534,7 @@
 	Slick.prototype.checkResponsive = function( initial, forceUpdate ) {
 
 		const _ = this;
-		let breakpoint, targetBreakpoint, respondToWidth, triggerBreakpoint = false;
+		let targetBreakpoint, respondToWidth, triggerBreakpoint = false;
 		const sliderWidth = _.slider.offsetWidth;
 		const windowWidth = window.innerWidth;
 
@@ -552,16 +552,14 @@
 
 			targetBreakpoint = null;
 
-			for ( breakpoint in _.breakpoints ) {
-				if ( _.breakpoints.hasOwnProperty( breakpoint ) ) {
-					if ( false === _.originalSettings.mobileFirst ) {
-						if ( respondToWidth < _.breakpoints[breakpoint] ) {
-							targetBreakpoint = _.breakpoints[breakpoint];
-						}
-					} else {
-						if ( respondToWidth >= _.breakpoints[breakpoint] ) {
-							targetBreakpoint = _.breakpoints[breakpoint];
-						}
+			for ( const breakpoint of _.breakpoints ) {
+				if ( false === _.originalSettings.mobileFirst ) {
+					if ( respondToWidth < breakpoint ) {
+						targetBreakpoint = breakpoint;
+					}
+				} else {
+					if ( respondToWidth >= breakpoint ) {
+						targetBreakpoint = breakpoint;
 					}
 				}
 			}
@@ -677,12 +675,12 @@
 		if ( index > navigables[navigables.length - 1] ) {
 			index = navigables[navigables.length - 1];
 		} else {
-			for ( let n in navigables ) {
-				if ( index < navigables[n] ) {
+			for ( const n of navigables ) {
+				if ( index < n ) {
 					index = prevNavigable;
 					break;
 				}
-				prevNavigable = navigables[n];
+				prevNavigable = n;
 			}
 		}
 
@@ -1468,35 +1466,33 @@
 	Slick.prototype.registerBreakpoints = function() {
 
 		const _ = this;
-		let breakpoint, currentBreakpoint, l;
+		let currentBreakpoint, l;
 		const responsiveSettings = _.options.responsive || null;
 
 		if ( Array.isArray( responsiveSettings ) && responsiveSettings.length ) {
 
 			_.respondTo = _.options.respondTo || 'window';
 
-			for ( breakpoint in responsiveSettings ) {
+			for ( const breakpointSetting of responsiveSettings ) {
 
 				l = _.breakpoints.length - 1;
 
-				if ( responsiveSettings.hasOwnProperty( breakpoint ) ) {
-					currentBreakpoint = responsiveSettings[breakpoint].breakpoint;
+				currentBreakpoint = breakpointSetting.breakpoint;
 
-					const parsedBreakpoint = parseBreakpoint( currentBreakpoint );
+				const parsedBreakpoint = parseBreakpoint( currentBreakpoint );
 
-					// Loop through the breakpoints and cut out any existing
-					// ones with the same breakpoint number, we don't want
-					// dupes.
-					while ( 0 <= l ) {
-						if ( _.breakpoints[l] && _.breakpoints[l] === parsedBreakpoint ) {
-							_.breakpoints.splice( l, 1 );
-						}
-						l--;
+				// Loop through the breakpoints and cut out any existing
+				// ones with the same breakpoint number, we don't want
+				// dupes.
+				while ( 0 <= l ) {
+					if ( _.breakpoints[l] && _.breakpoints[l] === parsedBreakpoint ) {
+						_.breakpoints.splice( l, 1 );
 					}
-
-					_.breakpoints.push( parsedBreakpoint );
-					_.breakpointSettings[parsedBreakpoint] = responsiveSettings[breakpoint].settings;
+					l--;
 				}
+
+				_.breakpoints.push( parsedBreakpoint );
+				_.breakpointSettings[parsedBreakpoint] = breakpointSetting.settings;
 			}
 
 			_.breakpoints.sort( function( a, b ) {
@@ -1675,7 +1671,7 @@
 	};
 
 	Slick.prototype.setOption =
-	Slick.prototype.slickSetOption = function() {
+	Slick.prototype.slickSetOption = function( arg0, arg1, arg2 ) {
 
 		/**
 		 * accepts arguments in format of:
@@ -1691,20 +1687,20 @@
 		 */
 
 		const _ = this;
-		let l, item, option, value, refresh = false, type;
+		let l, option, value, refresh = false, type;
 
-		if ( '[object Object]' === Object.prototype.toString.call( arguments[0] ) ) {
-			option  = arguments[0];
-			refresh = arguments[1];
+		if ( '[object Object]' === Object.prototype.toString.call( arg0 ) ) {
+			option  = arg0;
+			refresh = arg1;
 			type    = 'multiple';
-		} else if ( 'string' === typeof arguments[0] ) {
-			option  = arguments[0];
-			value   = arguments[1];
-			refresh = arguments[2];
+		} else if ( 'string' === typeof arg0 ) {
+			option  = arg0;
+			value   = arg1;
+			refresh = arg2;
 
-			if ( 'responsive' === arguments[0] && Array.isArray( arguments[1] ) ) {
+			if ( 'responsive' === arg0 && Array.isArray( arg1 ) ) {
 				type = 'responsive';
-			} else if ( 'undefined' !== typeof arguments[1] ) {
+			} else if ( 'undefined' !== typeof arg1 ) {
 				type = 'single';
 			}
 		}
@@ -1718,10 +1714,10 @@
 			});
 		} else if ( 'responsive' === type ) {
 
-			for ( item in value ) {
+			for ( const responsiveItem of value ) {
 
 				if ( ! Array.isArray( _.options.responsive ) ) {
-					_.options.responsive = [ value[item] ];
+					_.options.responsive = [ responsiveItem ];
 				} else {
 					l = _.options.responsive.length - 1;
 
@@ -1729,14 +1725,14 @@
 					// duplicates.
 					while ( 0 <= l ) {
 
-						if ( _.options.responsive[l].breakpoint === value[item].breakpoint ) {
+						if ( _.options.responsive[l].breakpoint === responsiveItem.breakpoint ) {
 							_.options.responsive.splice( l, 1 );
 						}
 
 						l--;
 					}
 
-					_.options.responsive.push( value[item] );
+					_.options.responsive.push( responsiveItem );
 				}
 			}
 		}
@@ -2467,12 +2463,11 @@
 
 	};
 
-	window.slickInit = function( selector, opt ) {
+	window.slickInit = function( selector, opt, ...args ) {
 		const elements = 'string' === typeof selector ?
 			Array.from( document.querySelectorAll( selector ) ) :
 			( selector instanceof Element ? [ selector ] : Array.from( selector ) );
 
-		const args = Array.prototype.slice.call( arguments, 2 );
 		let ret;
 
 		elements.forEach( el => {
